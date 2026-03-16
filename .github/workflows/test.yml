@@ -19,7 +19,7 @@ jobs:
         run: uv python install 3.11
 
       - name: Install dependencies
-        run: uv sync --dev
+        run: uv sync --extra dev
 
       - name: Validate plugin.json
         run: python -c "import json; json.load(open('.claude-plugin/plugin.json'))"
