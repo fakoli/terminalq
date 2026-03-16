@@ -1,0 +1,17 @@
+data/
+.env
+__pycache__/
+*.pyc
+.venv/
+dist/
+*.egg-info/
+.pytest_cache/
+
+# Private reference data (real financial info / PII)
+# Copy the .example.md files and fill in your own data
+reference/portfolio-holdings.md
+reference/rsu-schedule.md
+reference/accounts.md
+reference/watchlist.md
+reference/etf-classifications.md
+.DS_Store
