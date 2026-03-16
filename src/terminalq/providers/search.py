@@ -3,7 +3,7 @@
 import httpx
 
 from terminalq import cache, usage_tracker
-from terminalq.config import BRAVE_API_KEY, CACHE_TTL_SEARCH
+from terminalq.config import BRAVE_API_KEY, BRAVE_MONTHLY_LIMIT, CACHE_TTL_SEARCH
 from terminalq.logging_config import log
 
 BASE_URL = "https://api.search.brave.com/res/v1/web/search"
@@ -31,16 +31,14 @@ async def web_search(query: str, count: int = 5) -> dict:
         log.debug("Cache hit: %s", cache_key)
         return cached
 
-    # Check and track Brave Search budget
-    BRAVE_MONTHLY_LIMIT = 2000
-    if not usage_tracker.check_budget("brave_search", BRAVE_MONTHLY_LIMIT):
-        usage = usage_tracker.get_monthly_usage("brave_search", BRAVE_MONTHLY_LIMIT)
+    # Atomically increment and check Brave Search budget
+    within_budget, usage = await usage_tracker.increment_and_check("brave_search", BRAVE_MONTHLY_LIMIT)
+    if not within_budget:
         return {
             "error": f"Brave Search monthly limit reached ({BRAVE_MONTHLY_LIMIT} calls). Resets next month.",
             "usage": usage,
             "source": "brave_search",
         }
-    usage_tracker.increment_usage("brave_search")
 
     count = min(count, 20)
 
@@ -95,14 +93,13 @@ async def web_search(query: str, count: int = 5) -> dict:
             }
         )
 
-    usage = usage_tracker.get_monthly_usage("brave_search", BRAVE_MONTHLY_LIMIT)
     result = {
         "query": query,
         "total_results": len(results),
         "results": results,
         "news": news,
         "source": "brave_search",
-        "usage": usage,
+        "usage": usage_tracker.get_monthly_usage("brave_search", BRAVE_MONTHLY_LIMIT),
     }
     cache.set(cache_key, result, CACHE_TTL_SEARCH)
     return result

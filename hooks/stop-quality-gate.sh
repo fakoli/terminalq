@@ -60,4 +60,5 @@ if [[ ${#MISSING[@]} -gt 0 ]]; then
     echo ""
     echo "All financial analysis outputs must include a disclaimer and data freshness notes."
     echo "See: docs/output-contracts.md"
+    exit 2
 fi

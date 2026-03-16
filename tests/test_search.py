@@ -128,12 +128,11 @@ async def test_web_search_cache_hit():
 @patch("terminalq.providers.search.BRAVE_API_KEY", "test_brave_key")
 async def test_web_search_budget_exceeded():
     """Returns error when monthly budget is exceeded."""
-    with patch("terminalq.providers.search.usage_tracker.check_budget", return_value=False):
-        with patch(
-            "terminalq.providers.search.usage_tracker.get_monthly_usage",
-            return_value={"calls_used": 2000, "calls_limit": 2000, "remaining": 0},
-        ):
-            result = await search.web_search("over budget query")
+    mock_usage = {"calls_used": 2001, "calls_limit": 2000, "remaining": 0,
+                  "provider": "brave_search", "month": "2026-03", "first_call": None, "last_call": None}
+    with patch("terminalq.providers.search.usage_tracker.increment_and_check",
+               new_callable=AsyncMock, return_value=(False, mock_usage)):
+        result = await search.web_search("over budget query")
 
     assert "error" in result
     assert "monthly limit" in result["error"].lower() or "limit reached" in result["error"]

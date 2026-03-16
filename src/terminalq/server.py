@@ -1,12 +1,14 @@
 """TerminalQ MCP Server — financial data tools for Claude Code."""
 
 import functools
+import inspect
 import json
 import time
 
 from mcp.server.fastmcp import FastMCP
 
 from terminalq import audit, charts, usage_tracker
+from terminalq.config import BRAVE_MONTHLY_LIMIT
 from terminalq.analytics import allocation, risk
 from terminalq.logging_config import log
 from terminalq.providers import coingecko, edgar, finnhub, fred, historical, portfolio, screener, search, technical
@@ -25,6 +27,16 @@ def audited(func):
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
         start = time.monotonic()
+
+        # Bind positional and keyword args to parameter names for audit logging
+        try:
+            sig = inspect.signature(func)
+            bound = sig.bind(*args, **kwargs)
+            bound.apply_defaults()
+            call_args = dict(bound.arguments)
+        except TypeError:
+            call_args = kwargs or {}
+
         result = await func(*args, **kwargs)
         duration = (time.monotonic() - start) * 1000
 
@@ -34,12 +46,12 @@ def audited(func):
         except (json.JSONDecodeError, TypeError):
             parsed = result
 
-        audit.log_tool_call(func.__name__, kwargs or {}, parsed, duration)
+        audit.log_tool_call(func.__name__, call_args, parsed, duration)
 
         # Track daily usage and payload size
-        usage_tracker.increment_daily("all_tools")
+        await usage_tracker.increment_daily("all_tools")
         if isinstance(result, str):
-            usage_tracker.record_payload_size("all_tools", len(result.encode()))
+            await usage_tracker.record_payload_size("all_tools", len(result.encode()))
 
         return result
 
@@ -662,7 +674,6 @@ async def terminalq_get_allocation() -> str:
 
 
 @mcp.tool()
-@audited
 async def terminalq_get_audit_log(date: str = "") -> str:
     """Get the audit trail of all TerminalQ tool invocations for a given date.
 
@@ -684,7 +695,6 @@ async def terminalq_get_audit_log(date: str = "") -> str:
 
 
 @mcp.tool()
-@audited
 async def terminalq_get_usage_stats() -> str:
     """Get daily and monthly usage statistics for TerminalQ.
 
@@ -692,7 +702,7 @@ async def terminalq_get_usage_stats() -> str:
     Brave Search budget remaining, and top tools by volume.
     """
     today_usage = usage_tracker.get_daily_usage("all_tools")
-    brave_usage = usage_tracker.get_monthly_usage("brave_search", 2000)
+    brave_usage = usage_tracker.get_monthly_usage("brave_search", BRAVE_MONTHLY_LIMIT)
     today_summary = audit.get_audit_summary()
 
     result = {

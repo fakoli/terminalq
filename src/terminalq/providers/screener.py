@@ -232,7 +232,7 @@ async def screen_stocks(
     response["completeness"] = {
         "total_matching": matches_after_all,
         "returned": len(results),
-        "is_complete": len(results) >= matches_after_all,
+        "is_complete": matches_after_all >= matches_after_sector,
         "universe_size": total_universe,
     }
     if note:

@@ -49,20 +49,38 @@ def test_monthly_limit_display():
     assert usage["remaining"] == 1998
 
 
-def test_daily_usage():
+async def test_daily_usage():
     """Daily usage tracking works."""
-    usage_tracker.increment_daily("test_daily")
-    usage_tracker.increment_daily("test_daily")
+    await usage_tracker.increment_daily("test_daily")
+    await usage_tracker.increment_daily("test_daily")
     daily = usage_tracker.get_daily_usage("test_daily")
     assert daily["calls_used"] == 2
 
 
-def test_payload_recording():
+async def test_payload_recording():
     """Payload size recording accumulates."""
-    usage_tracker.record_payload_size("test_payload", 1000)
-    usage_tracker.record_payload_size("test_payload", 2000)
+    await usage_tracker.record_payload_size("test_payload", 1000)
+    await usage_tracker.record_payload_size("test_payload", 2000)
     daily = usage_tracker.get_daily_usage("test_payload")
     assert daily.get("total_bytes", 0) == 3000
+
+
+async def test_increment_and_check_within_budget():
+    """Atomic increment_and_check returns True when within budget."""
+    within, usage = await usage_tracker.increment_and_check("atomic_test", 100)
+    assert within is True
+    assert usage["calls_used"] == 1
+    assert usage["remaining"] == 99
+
+
+async def test_increment_and_check_over_budget():
+    """Atomic increment_and_check returns False when over budget."""
+    for _ in range(5):
+        usage_tracker.increment_usage("atomic_over")
+    within, usage = await usage_tracker.increment_and_check("atomic_over", 5)
+    assert within is False
+    assert usage["calls_used"] == 6
+    assert usage["remaining"] == 0
 
 
 # ---------------------------------------------------------------------------
@@ -135,7 +153,7 @@ def test_get_daily_usage_corrupt_file(tmp_usage_dir):
 # ---------------------------------------------------------------------------
 
 
-def test_increment_daily_corrupt_existing(tmp_usage_dir):
+async def test_increment_daily_corrupt_existing(tmp_usage_dir):
     """increment_daily handles corrupt existing file gracefully."""
     from datetime import datetime
 
@@ -144,19 +162,19 @@ def test_increment_daily_corrupt_existing(tmp_usage_dir):
     path.write_text("<<<invalid>>>")
 
     # Should not raise, resets to default and increments
-    usage_tracker.increment_daily("corrupt_inc")
+    await usage_tracker.increment_daily("corrupt_inc")
 
     daily = usage_tracker.get_daily_usage("corrupt_inc")
     assert daily["calls_used"] == 1
 
 
-def test_increment_daily_write_oserror(tmp_usage_dir, monkeypatch):
+async def test_increment_daily_write_oserror(tmp_usage_dir, monkeypatch):
     """OSError during increment_daily write is silently caught."""
     from pathlib import Path
     from unittest.mock import patch
 
     # First, do a successful increment so the file exists
-    usage_tracker.increment_daily("write_fail")
+    await usage_tracker.increment_daily("write_fail")
 
     original_write = Path.write_text
 
@@ -167,7 +185,7 @@ def test_increment_daily_write_oserror(tmp_usage_dir, monkeypatch):
 
     with patch.object(Path, "write_text", _fail_write):
         # Should not raise
-        usage_tracker.increment_daily("write_fail")
+        await usage_tracker.increment_daily("write_fail")
 
 
 # ---------------------------------------------------------------------------
@@ -175,7 +193,7 @@ def test_increment_daily_write_oserror(tmp_usage_dir, monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-def test_record_payload_corrupt_existing(tmp_usage_dir):
+async def test_record_payload_corrupt_existing(tmp_usage_dir):
     """record_payload_size handles corrupt existing file gracefully."""
     from datetime import datetime
 
@@ -183,13 +201,13 @@ def test_record_payload_corrupt_existing(tmp_usage_dir):
     path = tmp_usage_dir / f"daily_payload_corrupt_{today}.json"
     path.write_text("not json")
 
-    usage_tracker.record_payload_size("payload_corrupt", 500)
+    await usage_tracker.record_payload_size("payload_corrupt", 500)
 
     daily = usage_tracker.get_daily_usage("payload_corrupt")
     assert daily.get("total_bytes", 0) == 500
 
 
-def test_record_payload_write_oserror(tmp_usage_dir, monkeypatch):
+async def test_record_payload_write_oserror(tmp_usage_dir, monkeypatch):
     """OSError during record_payload_size write is silently caught."""
     from pathlib import Path
     from unittest.mock import patch
@@ -203,4 +221,4 @@ def test_record_payload_write_oserror(tmp_usage_dir, monkeypatch):
 
     with patch.object(Path, "write_text", _fail_write):
         # Should not raise
-        usage_tracker.record_payload_size("payload_wfail", 1000)
+        await usage_tracker.record_payload_size("payload_wfail", 1000)

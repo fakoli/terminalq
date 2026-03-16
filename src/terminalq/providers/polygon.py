@@ -1,6 +1,6 @@
 """Polygon.io fallback provider for historical data and dividends."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import httpx
 
@@ -78,7 +78,7 @@ async def get_historical(symbol: str, period: str = "1y", interval: str = "1d") 
     for bar in results:
         prices.append(
             {
-                "date": datetime.fromtimestamp(bar["t"] / 1000).strftime("%Y-%m-%d"),
+                "date": datetime.fromtimestamp(bar["t"] / 1000, tz=timezone.utc).strftime("%Y-%m-%d"),
                 "open": round(bar["o"], 2),
                 "high": round(bar["h"], 2),
                 "low": round(bar["l"], 2),

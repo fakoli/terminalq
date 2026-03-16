@@ -61,3 +61,6 @@ CACHE_TTL_CALENDAR = 3600  # 1 hour for economic calendar
 CACHE_TTL_RATINGS = 86400  # 24 hours for analyst ratings
 CACHE_TTL_RISK = 21600  # 6 hours for risk metrics
 CACHE_TTL_ALLOCATION = 86400  # 24 hours for allocation analysis
+
+# --- Monthly API budgets ---
+BRAVE_MONTHLY_LIMIT = 2000  # Brave Search free tier: 2000 calls/month

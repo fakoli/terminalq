@@ -136,3 +136,16 @@ Keys are loaded from `~/.env` via python-dotenv (`override=True`).
 ## Error Convention
 
 All tools return errors as `{"error": "message", "symbol": "SYM", "source": "provider_name"}`. Providers never raise exceptions — they catch and return error dicts.
+
+## Code Conventions
+
+These conventions were established from code review feedback and must be followed:
+
+- **No magic constants.** API limits, budgets, and thresholds go in `config.py` (e.g., `BRAVE_MONTHLY_LIMIT`). Never duplicate a constant across files.
+- **UTC for all timestamps from external APIs.** Use `datetime.fromtimestamp(ts, tz=timezone.utc)`, not naive `datetime.fromtimestamp(ts)` which uses local timezone and shifts dates.
+- **Introspection tools must not audit themselves.** `terminalq_get_audit_log` and `terminalq_get_usage_stats` must NOT use the `@audited` decorator — it creates self-referential log pollution.
+- **Async locks for shared state.** `usage_tracker.py` uses `asyncio.Lock` per provider for all read-modify-write operations (`increment_daily`, `record_payload_size`, `increment_and_check`). Never do separate check-then-act on usage files — use `increment_and_check()` for atomic budget enforcement.
+- **Audit decorator captures all args.** The `@audited` wrapper uses `inspect.signature` + `bind()` to log both positional and keyword arguments. Do not rely on `kwargs` alone.
+- **Hooks must exit non-zero to block.** Claude Code Stop hooks only enforce when the script exits non-zero. Use `exit 2` for quality gate failures.
+- **Output contracts.** All 6 skills reference `docs/output-contracts.md`. Every financial skill output must include a **Data Freshness** table and **Disclaimer**. See the contracts doc for required sections per skill.
+- **Screener completeness.** `is_complete` in screener results compares `matches_after_all` against `matches_after_sector` (not `len(results)`) to correctly flag when the profile fetch threshold caused partial results.

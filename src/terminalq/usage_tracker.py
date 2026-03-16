@@ -1,5 +1,6 @@
 """Monthly usage tracking for quota-limited APIs and tool call volume."""
 
+import asyncio
 import json
 from datetime import datetime
 from pathlib import Path
@@ -8,6 +9,17 @@ from terminalq.config import CACHE_DIR
 from terminalq.logging_config import log
 
 _USAGE_DIR = CACHE_DIR.parent / "usage"
+
+# In-memory locks keyed by provider to prevent concurrent read-modify-write races.
+# Safe in a single-process MCP server with async concurrency.
+_locks: dict[str, asyncio.Lock] = {}
+
+
+def _get_lock(key: str) -> asyncio.Lock:
+    """Get or create an asyncio.Lock for a given key."""
+    if key not in _locks:
+        _locks[key] = asyncio.Lock()
+    return _locks[key]
 
 
 def _usage_path(provider: str) -> Path:
@@ -61,7 +73,7 @@ def get_monthly_usage(provider: str, limit: int = 0) -> dict:
 
 
 def increment_usage(provider: str) -> dict:
-    """Atomically increment usage counter and return updated stats.
+    """Increment usage counter and return updated stats.
 
     Returns:
         Dict with updated calls_used and timestamp.
@@ -74,6 +86,37 @@ def increment_usage(provider: str) -> dict:
     data["last_call"] = now
     _write_usage(provider, data)
     return data
+
+
+async def increment_and_check(provider: str, limit: int) -> tuple[bool, dict]:
+    """Atomically increment usage and check budget under a lock.
+
+    Returns:
+        (within_budget, usage_dict) — within_budget is True if
+        the post-increment count is still <= limit.
+    """
+    lock = _get_lock(f"monthly_{provider}")
+    async with lock:
+        data = _read_usage(provider)
+        now = datetime.now().isoformat()
+        data["calls_used"] = data.get("calls_used", 0) + 1
+        if not data.get("first_call"):
+            data["first_call"] = now
+        data["last_call"] = now
+        _write_usage(provider, data)
+
+        within_budget = data["calls_used"] <= limit
+        month = datetime.now().strftime("%Y-%m")
+        usage = {
+            "provider": provider,
+            "calls_used": data["calls_used"],
+            "calls_limit": limit,
+            "month": month,
+            "remaining": max(0, limit - data["calls_used"]),
+            "first_call": data.get("first_call"),
+            "last_call": data.get("last_call"),
+        }
+        return within_budget, usage
 
 
 def check_budget(provider: str, limit: int) -> bool:
@@ -105,37 +148,41 @@ def get_daily_usage(provider: str) -> dict:
         return {"calls_used": 0, "date": today, "provider": provider}
 
 
-def increment_daily(provider: str) -> None:
-    """Increment daily usage counter."""
-    today = datetime.now().strftime("%Y-%m-%d")
-    path = _USAGE_DIR / f"daily_{provider}_{today}.json"
-    _USAGE_DIR.mkdir(parents=True, exist_ok=True)
-    data = {"calls_used": 0, "total_bytes": 0}
-    if path.exists():
+async def increment_daily(provider: str) -> None:
+    """Increment daily usage counter under a lock."""
+    lock = _get_lock(f"daily_{provider}")
+    async with lock:
+        today = datetime.now().strftime("%Y-%m-%d")
+        path = _USAGE_DIR / f"daily_{provider}_{today}.json"
+        _USAGE_DIR.mkdir(parents=True, exist_ok=True)
+        data = {"calls_used": 0, "total_bytes": 0}
+        if path.exists():
+            try:
+                data = json.loads(path.read_text())
+            except (json.JSONDecodeError, OSError):
+                pass
+        data["calls_used"] = data.get("calls_used", 0) + 1
         try:
-            data = json.loads(path.read_text())
-        except (json.JSONDecodeError, OSError):
+            path.write_text(json.dumps(data, default=str))
+        except OSError:
             pass
-    data["calls_used"] = data.get("calls_used", 0) + 1
-    try:
-        path.write_text(json.dumps(data, default=str))
-    except OSError:
-        pass
 
 
-def record_payload_size(provider: str, size_bytes: int) -> None:
-    """Record response payload size for token estimation."""
-    today = datetime.now().strftime("%Y-%m-%d")
-    path = _USAGE_DIR / f"daily_{provider}_{today}.json"
-    _USAGE_DIR.mkdir(parents=True, exist_ok=True)
-    data = {"calls_used": 0, "total_bytes": 0}
-    if path.exists():
+async def record_payload_size(provider: str, size_bytes: int) -> None:
+    """Record response payload size for token estimation under a lock."""
+    lock = _get_lock(f"daily_{provider}")
+    async with lock:
+        today = datetime.now().strftime("%Y-%m-%d")
+        path = _USAGE_DIR / f"daily_{provider}_{today}.json"
+        _USAGE_DIR.mkdir(parents=True, exist_ok=True)
+        data = {"calls_used": 0, "total_bytes": 0}
+        if path.exists():
+            try:
+                data = json.loads(path.read_text())
+            except (json.JSONDecodeError, OSError):
+                pass
+        data["total_bytes"] = data.get("total_bytes", 0) + size_bytes
         try:
-            data = json.loads(path.read_text())
-        except (json.JSONDecodeError, OSError):
+            path.write_text(json.dumps(data, default=str))
+        except OSError:
             pass
-    data["total_bytes"] = data.get("total_bytes", 0) + size_bytes
-    try:
-        path.write_text(json.dumps(data, default=str))
-    except OSError:
-        pass
