@@ -3,16 +3,15 @@
 Uses only stdlib math/statistics for calculations. Fetches historical data
 via the historical provider and portfolio holdings from the portfolio provider.
 """
+
 import asyncio
 import math
 import statistics
-from datetime import datetime, timedelta
 
 from terminalq import cache
 from terminalq.config import CACHE_TTL_RISK
 from terminalq.logging_config import log
-from terminalq.providers import portfolio, historical
-
+from terminalq.providers import historical, portfolio
 
 # Risk-free rate assumption (annualized, approx current T-bill rate)
 RISK_FREE_RATE = 0.045
@@ -49,7 +48,7 @@ def _sortino_ratio(returns: list[float], risk_free_daily: float) -> float | None
     downside = [r for r in excess if r < 0]
     if len(downside) < 2:
         return None
-    downside_std = math.sqrt(sum(d ** 2 for d in downside) / len(downside))
+    downside_std = math.sqrt(sum(d**2 for d in downside) / len(downside))
     if downside_std == 0:
         return None
     return round((avg / downside_std) * math.sqrt(TRADING_DAYS), 4)

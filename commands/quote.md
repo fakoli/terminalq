@@ -10,6 +10,7 @@ arguments:
 Use the `terminalq_get_quote` MCP tool to get a real-time quote for the ticker symbol "$ARGUMENTS".
 
 Present the result in a clean format showing:
+
 - Current price with daily change ($ and %)
 - Day range (low - high)
 - Previous close

@@ -1,4 +1,5 @@
 """Portfolio data provider — loads holdings from local reference files."""
+
 import re
 from pathlib import Path
 
@@ -76,7 +77,8 @@ def _parse_holdings_md(path: Path) -> tuple[list[dict], str]:
             if missing:
                 log.warning(
                     "Missing required columns %s in account '%s'",
-                    missing, current_account,
+                    missing,
+                    current_account,
                 )
             continue
 
@@ -96,15 +98,17 @@ def _parse_holdings_md(path: Path) -> tuple[list[dict], str]:
             continue
 
         try:
-            holdings.append({
-                "symbol": symbol,
-                "name": row.get("name", ""),
-                "shares": float(row.get("shares", "0").replace(",", "")),
-                "cost_basis": _parse_dollar(row.get("cost_basis", "")),
-                "market_value": _parse_dollar(row.get("market_value", "")),
-                "unrealized_gl": _parse_dollar(row.get("unrealized_gl", "")),
-                "account": current_account,
-            })
+            holdings.append(
+                {
+                    "symbol": symbol,
+                    "name": row.get("name", ""),
+                    "shares": float(row.get("shares", "0").replace(",", "")),
+                    "cost_basis": _parse_dollar(row.get("cost_basis", "")),
+                    "market_value": _parse_dollar(row.get("market_value", "")),
+                    "unrealized_gl": _parse_dollar(row.get("unrealized_gl", "")),
+                    "account": current_account,
+                }
+            )
         except (ValueError, AttributeError) as e:
             log.warning("Skipping malformed row in '%s': %s — %s", current_account, row, e)
             continue
@@ -198,11 +202,13 @@ def load_watchlist() -> list[dict]:
 
         symbol = row.get("symbol", "").strip()
         if symbol:
-            items.append({
-                "symbol": symbol,
-                "name": row.get("name", ""),
-                "notes": row.get("notes", ""),
-            })
+            items.append(
+                {
+                    "symbol": symbol,
+                    "name": row.get("name", ""),
+                    "notes": row.get("notes", ""),
+                }
+            )
 
     log.info("Loaded %d watchlist symbols from %s", len(items), watchlist_path.name)
     return items
@@ -223,12 +229,14 @@ def load_rsu_schedule() -> list[dict]:
             parts = [p.strip() for p in line.split("|")[1:-1]]
             if len(parts) >= 3:
                 try:
-                    schedule.append({
-                        "date": parts[0],
-                        "grant": parts[1] if len(parts) > 1 else "",
-                        "pct_of_grant": parts[2] if len(parts) > 2 else "",
-                        "est_value": parts[3] if len(parts) > 3 else "",
-                    })
+                    schedule.append(
+                        {
+                            "date": parts[0],
+                            "grant": parts[1] if len(parts) > 1 else "",
+                            "pct_of_grant": parts[2] if len(parts) > 2 else "",
+                            "est_value": parts[3] if len(parts) > 3 else "",
+                        }
+                    )
                 except (ValueError, IndexError):
                     continue
 

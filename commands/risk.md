@@ -10,6 +10,7 @@ arguments:
 Use `terminalq_compute_portfolio_risk` with the specified period (default "1y").
 
 Present the risk report showing:
+
 - **Return**: Annualized return vs SPY benchmark
 - **Volatility**: Annualized standard deviation
 - **Sharpe Ratio**: Risk-adjusted return (>1 good, >2 excellent)

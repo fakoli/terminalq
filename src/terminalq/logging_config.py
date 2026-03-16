@@ -1,4 +1,5 @@
 """Logging configuration for TerminalQ."""
+
 import logging
 import sys
 

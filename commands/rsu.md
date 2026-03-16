@@ -7,6 +7,7 @@ description: Show Pinterest RSU vesting schedule and current PINS holdings
 2. Use `terminalq_get_quote` with symbol "PINS" to get the current stock price.
 
 Present:
+
 - **Current PINS Holdings**: 2,722 shares at current price = current value
 - **Upcoming Vests**: Show the next 3-4 vesting dates with estimated share count and value at current price
 - **Total 2026 Projected Vesting Value**: Sum of all 2026 vests at current PINS price

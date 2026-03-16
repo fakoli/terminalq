@@ -3,11 +3,11 @@
 Parses reference/etf-classifications.md to map ETFs to asset class, region,
 and sub-class, then loads portfolio holdings to compute allocation percentages.
 """
+
 import re
-from pathlib import Path
 
 from terminalq import cache
-from terminalq.config import PORTFOLIO_DIR, CACHE_TTL_ALLOCATION
+from terminalq.config import CACHE_TTL_ALLOCATION, PORTFOLIO_DIR
 from terminalq.logging_config import log
 from terminalq.providers import portfolio
 
@@ -132,15 +132,17 @@ def compute_allocation() -> dict:
         if sub_class:
             by_sub_class[sub_class] = round(by_sub_class.get(sub_class, 0) + pct, 2)
 
-        holding_details.append({
-            "symbol": sym,
-            "name": symbol_names.get(sym, ""),
-            "market_value": round(value, 2),
-            "weight_pct": pct,
-            "asset_class": asset_class,
-            "region": region,
-            "sub_class": sub_class,
-        })
+        holding_details.append(
+            {
+                "symbol": sym,
+                "name": symbol_names.get(sym, ""),
+                "market_value": round(value, 2),
+                "weight_pct": pct,
+                "asset_class": asset_class,
+                "region": region,
+                "sub_class": sub_class,
+            }
+        )
 
     # Sort breakdowns by weight descending
     by_asset_class_sorted = dict(sorted(by_asset_class.items(), key=lambda x: -x[1]))

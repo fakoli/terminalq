@@ -12,11 +12,13 @@ If a specific indicator is provided ("$ARGUMENTS"), use `terminalq_get_economic_
 If no indicator is provided, use `terminalq_get_macro_dashboard` to get the full dashboard.
 
 **For a single indicator**, present:
+
 - Current value and date
 - Trend over last 12 observations
 - Context (what this indicator measures, why it matters)
 
 **For the full dashboard**, present a macro overview:
+
 - **Growth**: GDP trend
 - **Inflation**: CPI, Core CPI levels and direction
 - **Labor**: Unemployment rate, claims trend

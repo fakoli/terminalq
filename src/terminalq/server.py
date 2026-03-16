@@ -1,17 +1,53 @@
 """TerminalQ MCP Server — financial data tools for Claude Code."""
+
+import functools
 import json
+import time
 
 from mcp.server.fastmcp import FastMCP
 
-from terminalq.providers import finnhub, portfolio, historical, edgar, fred, technical, screener, coingecko, search
-from terminalq.analytics import risk, allocation
-from terminalq import charts
+from terminalq import audit, charts, usage_tracker
+from terminalq.analytics import allocation, risk
 from terminalq.logging_config import log
+from terminalq.providers import coingecko, edgar, finnhub, fred, historical, portfolio, screener, search, technical
 
 mcp = FastMCP("TerminalQ")
 
 
+# ---------------------------------------------------------------------------
+# Audit decorator — wraps every tool to log calls, timing, and payload sizes
+# ---------------------------------------------------------------------------
+
+
+def audited(func):
+    """Decorator that logs every MCP tool invocation to the audit trail."""
+
+    @functools.wraps(func)
+    async def wrapper(*args, **kwargs):
+        start = time.monotonic()
+        result = await func(*args, **kwargs)
+        duration = (time.monotonic() - start) * 1000
+
+        # Parse result for audit logging
+        try:
+            parsed = json.loads(result) if isinstance(result, str) else result
+        except (json.JSONDecodeError, TypeError):
+            parsed = result
+
+        audit.log_tool_call(func.__name__, kwargs or {}, parsed, duration)
+
+        # Track daily usage and payload size
+        usage_tracker.increment_daily("all_tools")
+        if isinstance(result, str):
+            usage_tracker.record_payload_size("all_tools", len(result.encode()))
+
+        return result
+
+    return wrapper
+
+
 @mcp.tool()
+@audited
 async def terminalq_get_quote(symbol: str) -> str:
     """Get real-time stock/ETF quote with price, change, and volume.
 
@@ -23,6 +59,7 @@ async def terminalq_get_quote(symbol: str) -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_quotes_batch(symbols: str) -> str:
     """Get quotes for multiple symbols at once. More efficient than calling get_quote repeatedly.
 
@@ -35,6 +72,7 @@ async def terminalq_get_quotes_batch(symbols: str) -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_portfolio() -> str:
     """Get current portfolio holdings across all accounts (Fidelity Joint, Fidelity Roth IRA, Schwab).
 
@@ -75,6 +113,7 @@ async def terminalq_get_portfolio() -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_portfolio_live() -> str:
     """Get portfolio holdings with LIVE prices from Finnhub.
 
@@ -107,14 +146,16 @@ async def terminalq_get_portfolio_live() -> str:
             daily_change = 0
             price_source = "stale_reference"
 
-        live_holdings.append({
-            **h,
-            "live_price": live_price,
-            "live_value": round(live_value, 2),
-            "daily_change": round(daily_change, 2),
-            "daily_pct": q.get("percent_change"),
-            "price_source": price_source,
-        })
+        live_holdings.append(
+            {
+                **h,
+                "live_price": live_price,
+                "live_value": round(live_value, 2),
+                "daily_change": round(daily_change, 2),
+                "daily_pct": q.get("percent_change"),
+                "price_source": price_source,
+            }
+        )
         total_live_value += live_value
         total_daily_change += daily_change
 
@@ -131,6 +172,7 @@ async def terminalq_get_portfolio_live() -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_company_profile(symbol: str) -> str:
     """Get company profile including name, industry, market cap, and key info.
 
@@ -142,6 +184,7 @@ async def terminalq_get_company_profile(symbol: str) -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_news(symbol: str, days: int = 7) -> str:
     """Get recent news articles for a company.
 
@@ -154,6 +197,7 @@ async def terminalq_get_news(symbol: str, days: int = 7) -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_rsu_schedule() -> str:
     """Get Pinterest RSU vesting schedule for 2026-2028."""
     schedule = portfolio.load_rsu_schedule()
@@ -163,6 +207,7 @@ async def terminalq_get_rsu_schedule() -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_earnings(symbol: str) -> str:
     """Get earnings history and estimates for a company.
 
@@ -177,6 +222,7 @@ async def terminalq_get_earnings(symbol: str) -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_historical(symbol: str, period: str = "1y", interval: str = "1d") -> str:
     """Get historical OHLCV price data for a symbol.
 
@@ -190,6 +236,7 @@ async def terminalq_get_historical(symbol: str, period: str = "1y", interval: st
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_dividends(symbol: str, years: int = 5) -> str:
     """Get dividend payment history and current yield.
 
@@ -202,6 +249,7 @@ async def terminalq_get_dividends(symbol: str, years: int = 5) -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_financials(symbol: str, statement: str = "income", periods: int = 4) -> str:
     """Get financial statements from SEC filings (income statement, balance sheet, cash flow).
 
@@ -215,6 +263,7 @@ async def terminalq_get_financials(symbol: str, statement: str = "income", perio
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_filings(symbol: str, filing_type: str = "", limit: int = 10) -> str:
     """Search SEC filings for a company (10-K, 10-Q, 8-K, etc.).
 
@@ -228,6 +277,7 @@ async def terminalq_get_filings(symbol: str, filing_type: str = "", limit: int =
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_economic_indicator(indicator: str, limit: int = 12) -> str:
     """Get economic indicator data from FRED (Federal Reserve).
 
@@ -242,6 +292,7 @@ async def terminalq_get_economic_indicator(indicator: str, limit: int = 12) -> s
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_macro_dashboard() -> str:
     """Get a dashboard of key economic indicators (GDP, CPI, unemployment, Fed funds, yields, etc.).
 
@@ -252,6 +303,7 @@ async def terminalq_get_macro_dashboard() -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_technicals(symbol: str) -> str:
     """Get technical analysis indicators for a symbol (SMA, EMA, RSI, MACD, Bollinger Bands, ATR).
 
@@ -263,6 +315,7 @@ async def terminalq_get_technicals(symbol: str) -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_screen_stocks(
     sector: str = "",
     min_market_cap: float = 0,
@@ -290,6 +343,7 @@ async def terminalq_screen_stocks(
 
 
 @mcp.tool()
+@audited
 async def terminalq_chart_price(symbol: str, period: str = "6mo", chart_type: str = "line") -> str:
     """Generate a price chart for a symbol.
 
@@ -324,6 +378,7 @@ async def terminalq_chart_price(symbol: str, period: str = "6mo", chart_type: st
 
 
 @mcp.tool()
+@audited
 async def terminalq_chart_comparison(symbols: str, period: str = "1y") -> str:
     """Compare price performance of multiple symbols on one chart (% return normalized).
 
@@ -332,6 +387,7 @@ async def terminalq_chart_comparison(symbols: str, period: str = "1y") -> str:
         period: Lookback period — 1mo, 3mo, 6mo, 1y, 2y (default 1y)
     """
     import asyncio as _asyncio
+
     symbol_list = [s.strip().upper() for s in symbols.split(",") if s.strip()]
     if len(symbol_list) < 2:
         return json.dumps({"error": "Provide at least 2 symbols separated by commas"})
@@ -358,6 +414,7 @@ async def terminalq_chart_comparison(symbols: str, period: str = "1y") -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_chart_allocation() -> str:
     """Visualize portfolio allocation by asset class."""
     alloc = allocation.compute_allocation()
@@ -371,13 +428,21 @@ async def terminalq_chart_allocation() -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_chart_yield_curve() -> str:
     """Plot the current US Treasury yield curve from FRED data."""
     import asyncio as _asyncio
+
     maturity_series = {
-        "1mo": "DGS1MO", "3mo": "DGS3MO", "6mo": "DGS6MO",
-        "1Y": "DGS1", "2Y": "DGS2", "5Y": "DGS5",
-        "10Y": "DGS10", "20Y": "DGS20", "30Y": "DGS30",
+        "1mo": "DGS1MO",
+        "3mo": "DGS3MO",
+        "6mo": "DGS6MO",
+        "1Y": "DGS1",
+        "2Y": "DGS2",
+        "5Y": "DGS5",
+        "10Y": "DGS10",
+        "20Y": "DGS20",
+        "30Y": "DGS30",
     }
 
     results = await _asyncio.gather(
@@ -403,14 +468,23 @@ async def terminalq_chart_yield_curve() -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_chart_sector_heatmap() -> str:
     """Show S&P 500 sector performance as a heatmap."""
     import asyncio as _asyncio
+
     sector_etfs = {
-        "Technology": "XLK", "Healthcare": "XLV", "Financials": "XLF",
-        "Cons. Disc.": "XLY", "Industrials": "XLI", "Comm. Svcs": "XLC",
-        "Cons. Staples": "XLP", "Energy": "XLE", "Utilities": "XLU",
-        "Real Estate": "XLRE", "Materials": "XLB",
+        "Technology": "XLK",
+        "Healthcare": "XLV",
+        "Financials": "XLF",
+        "Cons. Disc.": "XLY",
+        "Industrials": "XLI",
+        "Comm. Svcs": "XLC",
+        "Cons. Staples": "XLP",
+        "Energy": "XLE",
+        "Utilities": "XLU",
+        "Real Estate": "XLRE",
+        "Materials": "XLB",
     }
 
     results = await _asyncio.gather(
@@ -438,6 +512,7 @@ async def terminalq_chart_sector_heatmap() -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_analyst_ratings(symbol: str) -> str:
     """Get analyst ratings consensus and price targets for a stock.
 
@@ -449,6 +524,7 @@ async def terminalq_get_analyst_ratings(symbol: str) -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_watchlist() -> str:
     """Get watchlist symbols with live quotes and daily changes."""
     items = portfolio.load_watchlist()
@@ -463,17 +539,20 @@ async def terminalq_get_watchlist() -> str:
     for item in items:
         sym = item["symbol"]
         q = quote_map.get(sym, {})
-        watchlist.append({
-            **item,
-            "current_price": q.get("current_price"),
-            "change": q.get("change"),
-            "percent_change": q.get("percent_change"),
-        })
+        watchlist.append(
+            {
+                **item,
+                "current_price": q.get("current_price"),
+                "change": q.get("change"),
+                "percent_change": q.get("percent_change"),
+            }
+        )
 
     return json.dumps({"watchlist": watchlist, "source": "finnhub + watchlist.md"}, indent=2)
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_forex(pair: str = "") -> str:
     """Get forex exchange rates from FRED.
 
@@ -486,6 +565,7 @@ async def terminalq_get_forex(pair: str = "") -> str:
 
     # Dashboard: fetch all pairs
     import asyncio as _asyncio
+
     pairs = list(fred.FOREX_SERIES_MAP.keys())
     results = await _asyncio.gather(
         *[fred.get_forex(p, limit=2) for p in pairs],
@@ -506,6 +586,7 @@ async def terminalq_get_forex(pair: str = "") -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_crypto(symbol: str) -> str:
     """Get current cryptocurrency price, market cap, and 24h change.
 
@@ -517,6 +598,7 @@ async def terminalq_get_crypto(symbol: str) -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_crypto_batch(symbols: str) -> str:
     """Get prices for multiple cryptocurrencies at once.
 
@@ -529,6 +611,7 @@ async def terminalq_get_crypto_batch(symbols: str) -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_economic_calendar(days: int = 7) -> str:
     """Get upcoming economic events and data releases (CPI, FOMC, NFP, etc.).
 
@@ -540,6 +623,7 @@ async def terminalq_get_economic_calendar(days: int = 7) -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_web_search(query: str, count: int = 5) -> str:
     """Search the web for financial news, company info, or market analysis.
 
@@ -552,6 +636,7 @@ async def terminalq_web_search(query: str, count: int = 5) -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_risk_metrics(period: str = "1y") -> str:
     """Get portfolio risk analytics (Sharpe, Sortino, max drawdown, VaR, beta vs SPY).
 
@@ -563,6 +648,7 @@ async def terminalq_get_risk_metrics(period: str = "1y") -> str:
 
 
 @mcp.tool()
+@audited
 async def terminalq_get_allocation() -> str:
     """Get portfolio allocation analysis by asset class, region, and sub-class.
 
@@ -570,6 +656,56 @@ async def terminalq_get_allocation() -> str:
     """
     result = allocation.compute_allocation()
     return json.dumps(result, indent=2)
+
+
+# ---- Phase 3: Audit & Usage tools ----
+
+
+@mcp.tool()
+@audited
+async def terminalq_get_audit_log(date: str = "") -> str:
+    """Get the audit trail of all TerminalQ tool invocations for a given date.
+
+    Shows what tools were called, with what arguments, data sources used, and timing.
+    Useful for compliance, debugging, and understanding analysis provenance.
+
+    Args:
+        date: Date in YYYY-MM-DD format (default: today)
+    """
+    entries = audit.get_audit_log(date)
+    summary = audit.get_audit_summary(date)
+    result = {
+        "summary": summary,
+        "entries": entries[-50:],  # Last 50 entries to avoid huge responses
+        "total_entries": len(entries),
+        "note": f"Showing last {min(50, len(entries))} of {len(entries)} entries" if len(entries) > 50 else None,
+    }
+    return json.dumps(result, indent=2, default=str)
+
+
+@mcp.tool()
+@audited
+async def terminalq_get_usage_stats() -> str:
+    """Get daily and monthly usage statistics for TerminalQ.
+
+    Shows tool call counts, payload sizes (proxy for token consumption),
+    Brave Search budget remaining, and top tools by volume.
+    """
+    today_usage = usage_tracker.get_daily_usage("all_tools")
+    brave_usage = usage_tracker.get_monthly_usage("brave_search", 2000)
+    today_summary = audit.get_audit_summary()
+
+    result = {
+        "today": {
+            "tool_calls": today_usage.get("calls_used", 0),
+            "payload_bytes": today_usage.get("total_bytes", 0),
+            "estimated_tokens": today_usage.get("total_bytes", 0) // 4,  # ~4 bytes per token
+            "top_tools": today_summary.get("tools", {}),
+        },
+        "brave_search_budget": brave_usage,
+        "source": "terminalq_usage_tracker",
+    }
+    return json.dumps(result, indent=2, default=str)
 
 
 def main():

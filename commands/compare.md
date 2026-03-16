@@ -27,6 +27,7 @@ Parse the symbols from "$ARGUMENTS" — split on commas and/or spaces to get a l
    - A summary table showing each symbol's: start price, end price, total return %, and best/worst day
 
 Example output format:
+
 ```
 Performance Comparison — 6mo
 

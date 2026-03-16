@@ -1,8 +1,7 @@
 """Tests for terminalq.rate_limiter — async token bucket."""
+
 import asyncio
 import time
-
-import pytest
 
 from terminalq.rate_limiter import RateLimiter
 

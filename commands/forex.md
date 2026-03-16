@@ -12,6 +12,7 @@ If a specific pair is provided ("$ARGUMENTS"), use `terminalq_get_forex` with th
 If no pair is provided, fetch the major pairs: eurusd, usdjpy, gbpusd, usdchf, usdcad, audusd.
 
 Present each pair showing:
+
 - Current rate and date
 - Daily change (absolute and %)
 - Recent trend direction over the last 5-10 observations

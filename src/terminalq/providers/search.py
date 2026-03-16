@@ -1,7 +1,8 @@
 """Brave Search provider — web search for market news and research."""
+
 import httpx
 
-from terminalq import cache
+from terminalq import cache, usage_tracker
 from terminalq.config import BRAVE_API_KEY, CACHE_TTL_SEARCH
 from terminalq.logging_config import log
 
@@ -20,8 +21,7 @@ async def web_search(query: str, count: int = 5) -> dict:
     """
     if not BRAVE_API_KEY:
         return {
-            "error": "BRAVE_API_KEY not configured. Get a free key at "
-                     "https://brave.com/search/api/",
+            "error": "BRAVE_API_KEY not configured. Get a free key at https://brave.com/search/api/",
             "source": "brave_search",
         }
 
@@ -30,6 +30,17 @@ async def web_search(query: str, count: int = 5) -> dict:
     if cached:
         log.debug("Cache hit: %s", cache_key)
         return cached
+
+    # Check and track Brave Search budget
+    BRAVE_MONTHLY_LIMIT = 2000
+    if not usage_tracker.check_budget("brave_search", BRAVE_MONTHLY_LIMIT):
+        usage = usage_tracker.get_monthly_usage("brave_search", BRAVE_MONTHLY_LIMIT)
+        return {
+            "error": f"Brave Search monthly limit reached ({BRAVE_MONTHLY_LIMIT} calls). Resets next month.",
+            "usage": usage,
+            "source": "brave_search",
+        }
+    usage_tracker.increment_usage("brave_search")
 
     count = min(count, 20)
 
@@ -61,31 +72,37 @@ async def web_search(query: str, count: int = 5) -> dict:
     web_results = data.get("web", {}).get("results", [])
     results = []
     for item in web_results[:count]:
-        results.append({
-            "title": item.get("title", ""),
-            "url": item.get("url", ""),
-            "description": item.get("description", ""),
-            "age": item.get("age", ""),
-        })
+        results.append(
+            {
+                "title": item.get("title", ""),
+                "url": item.get("url", ""),
+                "description": item.get("description", ""),
+                "age": item.get("age", ""),
+            }
+        )
 
     # Parse news results if available
     news_results = data.get("news", {}).get("results", [])
     news = []
     for item in news_results[:5]:
-        news.append({
-            "title": item.get("title", ""),
-            "url": item.get("url", ""),
-            "description": item.get("description", ""),
-            "age": item.get("age", ""),
-            "source": item.get("meta_url", {}).get("hostname", ""),
-        })
+        news.append(
+            {
+                "title": item.get("title", ""),
+                "url": item.get("url", ""),
+                "description": item.get("description", ""),
+                "age": item.get("age", ""),
+                "source": item.get("meta_url", {}).get("hostname", ""),
+            }
+        )
 
+    usage = usage_tracker.get_monthly_usage("brave_search", BRAVE_MONTHLY_LIMIT)
     result = {
         "query": query,
         "total_results": len(results),
         "results": results,
         "news": news,
         "source": "brave_search",
+        "usage": usage,
     }
     cache.set(cache_key, result, CACHE_TTL_SEARCH)
     return result

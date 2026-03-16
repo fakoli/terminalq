@@ -10,6 +10,7 @@ arguments:
 Use the `terminalq_screen_stocks` MCP tool to screen S&P 500 stocks.
 
 Parse the user's criteria from "$ARGUMENTS":
+
 - Sector keywords → sector parameter (e.g., "tech" → "Technology", "health" → "Health Care")
 - "large cap" or "mega cap" → min_market_cap=50000
 - "mid cap" → max_market_cap=50000

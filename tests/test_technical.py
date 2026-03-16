@@ -1,13 +1,12 @@
 """Tests for terminalq.providers.technical — pure computation indicators."""
-import pytest
 
 from terminalq.providers.technical import (
-    compute_sma,
-    compute_ema,
-    compute_rsi,
-    compute_macd,
-    compute_bollinger_bands,
     compute_atr,
+    compute_bollinger_bands,
+    compute_ema,
+    compute_macd,
+    compute_rsi,
+    compute_sma,
 )
 
 
@@ -90,7 +89,7 @@ def test_rsi_neutral():
 def test_macd_bullish():
     """Accelerating uptrend produces positive MACD histogram (bullish)."""
     # Flat then sharply rising — fast EMA reacts quicker than slow EMA
-    closes = [100.0] * 30 + [100.0 + (i ** 1.5) for i in range(1, 21)]
+    closes = [100.0] * 30 + [100.0 + (i**1.5) for i in range(1, 21)]
     result = compute_macd(closes)
     assert result["histogram"] is not None
     assert result["histogram"] > 0
@@ -122,14 +121,16 @@ def test_atr_constant():
     # and close equals the same value each day
     prices = []
     for i in range(20):
-        prices.append({
-            "date": f"2026-01-{i + 1:02d}",
-            "open": 100.0,
-            "high": 101.0,
-            "low": 99.0,
-            "close": 100.0,
-            "volume": 1000000,
-        })
+        prices.append(
+            {
+                "date": f"2026-01-{i + 1:02d}",
+                "open": 100.0,
+                "high": 101.0,
+                "low": 99.0,
+                "close": 100.0,
+                "volume": 1000000,
+            }
+        )
 
     result = compute_atr(prices, period=14)
     assert result["atr"] is not None

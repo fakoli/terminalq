@@ -15,6 +15,7 @@ Use the `terminalq_get_filings` MCP tool to get SEC filings for "$ARGUMENTS".
 If a filing type is specified (e.g., "PINS 10-K"), pass it as the filing_type parameter.
 
 Present each filing with:
+
 - Filing type and date
 - Description
 - Link to the document on SEC.gov

@@ -1,12 +1,19 @@
 """Finnhub data provider — quotes, company profiles, news, and earnings."""
+
 import asyncio
+
 import httpx
 
 from terminalq import cache
 from terminalq.config import (
-    FINNHUB_API_KEY, FINNHUB_RATE_LIMIT,
-    CACHE_TTL_QUOTES, CACHE_TTL_FUNDAMENTALS, CACHE_TTL_NEWS, CACHE_TTL_EARNINGS,
-    CACHE_TTL_RATINGS, CACHE_TTL_CALENDAR,
+    CACHE_TTL_CALENDAR,
+    CACHE_TTL_EARNINGS,
+    CACHE_TTL_FUNDAMENTALS,
+    CACHE_TTL_NEWS,
+    CACHE_TTL_QUOTES,
+    CACHE_TTL_RATINGS,
+    FINNHUB_API_KEY,
+    FINNHUB_RATE_LIMIT,
 )
 from terminalq.logging_config import log
 from terminalq.rate_limiter import RateLimiter
@@ -166,7 +173,8 @@ async def get_company_news(symbol: str, days: int = 7) -> list[dict]:
 
     async with httpx.AsyncClient() as client:
         data = await _fetch(
-            client, f"{BASE_URL}/company-news",
+            client,
+            f"{BASE_URL}/company-news",
             {"symbol": symbol, "from": start, "to": end},
         )
 
@@ -198,7 +206,8 @@ async def get_earnings(symbol: str) -> dict:
 
     async with httpx.AsyncClient() as client:
         data = await _fetch(
-            client, f"{BASE_URL}/stock/earnings",
+            client,
+            f"{BASE_URL}/stock/earnings",
             {"symbol": symbol, "limit": 8},
         )
 
@@ -208,13 +217,15 @@ async def get_earnings(symbol: str) -> dict:
     earnings = []
     if isinstance(data, list):
         for item in data:
-            earnings.append({
-                "period": item.get("period"),
-                "actual_eps": item.get("actual"),
-                "estimate_eps": item.get("estimate"),
-                "surprise": item.get("surprise"),
-                "surprise_percent": item.get("surprisePercent"),
-            })
+            earnings.append(
+                {
+                    "period": item.get("period"),
+                    "actual_eps": item.get("actual"),
+                    "estimate_eps": item.get("estimate"),
+                    "surprise": item.get("surprise"),
+                    "surprise_percent": item.get("surprisePercent"),
+                }
+            )
 
     result = {
         "symbol": symbol,
@@ -247,14 +258,16 @@ async def get_analyst_ratings(symbol: str) -> dict:
     trend = []
     if isinstance(reco_data, list):
         for item in reco_data[:6]:
-            trend.append({
-                "period": item.get("period"),
-                "strong_buy": item.get("strongBuy", 0),
-                "buy": item.get("buy", 0),
-                "hold": item.get("hold", 0),
-                "sell": item.get("sell", 0),
-                "strong_sell": item.get("strongSell", 0),
-            })
+            trend.append(
+                {
+                    "period": item.get("period"),
+                    "strong_buy": item.get("strongBuy", 0),
+                    "buy": item.get("buy", 0),
+                    "hold": item.get("hold", 0),
+                    "sell": item.get("sell", 0),
+                    "strong_sell": item.get("strongSell", 0),
+                }
+            )
 
     # Compute consensus from the latest period
     consensus = "N/A"
@@ -325,7 +338,8 @@ async def get_economic_calendar(days: int = 7) -> dict:
 
     async with httpx.AsyncClient() as client:
         data = await _fetch(
-            client, f"{BASE_URL}/calendar/economic",
+            client,
+            f"{BASE_URL}/calendar/economic",
             {"from": start, "to": end},
         )
 
@@ -355,28 +369,28 @@ async def get_economic_calendar(days: int = 7) -> dict:
         else:
             impact_label = str(impact).lower() if impact else "unknown"
 
-        events.append({
-            "event": ev.get("event", ""),
-            "date": ev.get("time", ev.get("date", "")),
-            "impact": impact_label,
-            "actual": ev.get("actual"),
-            "estimate": ev.get("estimate"),
-            "previous": ev.get("prev"),
-            "unit": ev.get("unit", ""),
-        })
+        events.append(
+            {
+                "event": ev.get("event", ""),
+                "date": ev.get("time", ev.get("date", "")),
+                "impact": impact_label,
+                "actual": ev.get("actual"),
+                "estimate": ev.get("estimate"),
+                "previous": ev.get("prev"),
+                "unit": ev.get("unit", ""),
+            }
+        )
 
     # Sort by date
     events.sort(key=lambda e: e.get("date", ""))
 
     # Categorize by impact
-    high_impact = [e for e in events if e["impact"] == "high"]
-    medium_impact = [e for e in events if e["impact"] == "medium"]
-    low_impact = [e for e in events if e["impact"] == "low"]
+    high_impact_count = sum(1 for e in events if e["impact"] == "high")
 
     result = {
         "period": f"{start} to {end}",
         "total_events": len(events),
-        "high_impact_count": len(high_impact),
+        "high_impact_count": high_impact_count,
         "events": events,
         "source": "finnhub",
     }

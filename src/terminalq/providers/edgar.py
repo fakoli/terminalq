@@ -1,4 +1,5 @@
 """SEC EDGAR data provider — financial statements and filings."""
+
 import asyncio
 import time
 
@@ -6,10 +7,10 @@ import httpx
 
 from terminalq import cache
 from terminalq.config import (
-    SEC_USER_AGENT,
-    CACHE_TTL_FINANCIALS,
-    CACHE_TTL_FILINGS,
     CACHE_TTL_CIK,
+    CACHE_TTL_FILINGS,
+    CACHE_TTL_FINANCIALS,
+    SEC_USER_AGENT,
 )
 from terminalq.logging_config import log
 
@@ -99,7 +100,8 @@ def _error(symbol: str, msg: str) -> dict:
 
 
 async def _rate_limited_get(
-    client: httpx.AsyncClient, url: str,
+    client: httpx.AsyncClient,
+    url: str,
 ) -> httpx.Response:
     """Perform a GET that respects SEC's 10 req/sec fair-use policy."""
     global _last_request_time
@@ -118,6 +120,7 @@ async def _rate_limited_get(
 # ---------------------------------------------------------------------------
 # CIK resolution
 # ---------------------------------------------------------------------------
+
 
 async def _resolve_cik(symbol: str) -> str:
     """Resolve a ticker symbol to a zero-padded 10-digit CIK string.
@@ -140,7 +143,8 @@ async def _resolve_cik(symbol: str) -> str:
     if not tickers_data:
         async with httpx.AsyncClient() as client:
             resp = await _rate_limited_get(
-                client, "https://www.sec.gov/files/company_tickers.json",
+                client,
+                "https://www.sec.gov/files/company_tickers.json",
             )
             resp.raise_for_status()
             tickers_data = resp.json()
@@ -160,8 +164,11 @@ async def _resolve_cik(symbol: str) -> str:
 # Financial statements
 # ---------------------------------------------------------------------------
 
+
 def _extract_annual_values(
-    facts: dict, concept: str, periods: int,
+    facts: dict,
+    concept: str,
+    periods: int,
 ) -> list[dict]:
     """Return the latest *periods* 10-K entries for a us-gaap concept.
 
@@ -179,10 +186,7 @@ def _extract_annual_values(
     values_list = units.get("USD") or units.get("USD/shares") or []
 
     # Keep only 10-K entries (annual filings).
-    annual = [
-        v for v in values_list
-        if v.get("form") == "10-K" and v.get("end") and v.get("val") is not None
-    ]
+    annual = [v for v in values_list if v.get("form") == "10-K" and v.get("end") and v.get("val") is not None]
 
     # De-duplicate by period end (keep the latest filing per period).
     seen: dict[str, dict] = {}
@@ -203,7 +207,9 @@ def _extract_annual_values(
 
 
 async def get_financials(
-    symbol: str, statement: str = "income", periods: int = 4,
+    symbol: str,
+    statement: str = "income",
+    periods: int = 4,
 ) -> dict:
     """Fetch financial statement data from SEC EDGAR XBRL company facts.
 
@@ -227,8 +233,7 @@ async def get_financials(
     if concepts is None:
         return _error(
             symbol,
-            f"Unknown statement type '{statement}'. "
-            "Use 'income', 'balance_sheet', or 'cash_flow'.",
+            f"Unknown statement type '{statement}'. Use 'income', 'balance_sheet', or 'cash_flow'.",
         )
 
     # Resolve CIK.
@@ -302,8 +307,11 @@ async def get_financials(
 # Filings
 # ---------------------------------------------------------------------------
 
+
 async def get_filings(
-    symbol: str, filing_type: str = "", limit: int = 10,
+    symbol: str,
+    filing_type: str = "",
+    limit: int = 10,
 ) -> dict:
     """Fetch recent SEC filings for a company.
 
@@ -365,13 +373,15 @@ async def get_filings(
             else ""
         )
 
-        filings.append({
-            "type": form,
-            "filed_date": filed_dates[i] if i < len(filed_dates) else "",
-            "description": descriptions[i] if i < len(descriptions) else "",
-            "accession_number": accession,
-            "url": doc_url,
-        })
+        filings.append(
+            {
+                "type": form,
+                "filed_date": filed_dates[i] if i < len(filed_dates) else "",
+                "description": descriptions[i] if i < len(descriptions) else "",
+                "accession_number": accession,
+                "url": doc_url,
+            }
+        )
 
         if len(filings) >= limit:
             break

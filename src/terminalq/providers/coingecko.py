@@ -1,9 +1,9 @@
 """CoinGecko data provider — cryptocurrency quotes and batch pricing."""
-import asyncio
+
 import httpx
 
 from terminalq import cache
-from terminalq.config import COINGECKO_RATE_LIMIT, CACHE_TTL_CRYPTO
+from terminalq.config import CACHE_TTL_CRYPTO, COINGECKO_RATE_LIMIT
 from terminalq.logging_config import log
 from terminalq.rate_limiter import RateLimiter
 
@@ -85,7 +85,8 @@ async def get_crypto_quote(symbol: str) -> dict:
 
     async with httpx.AsyncClient() as client:
         data = await _fetch(
-            client, f"{BASE_URL}/coins/{coin_id}",
+            client,
+            f"{BASE_URL}/coins/{coin_id}",
             {
                 "localization": "false",
                 "tickers": "false",
@@ -157,7 +158,8 @@ async def get_crypto_batch(symbols: list[str]) -> list[dict]:
 
     async with httpx.AsyncClient() as client:
         data = await _fetch(
-            client, f"{BASE_URL}/coins/markets",
+            client,
+            f"{BASE_URL}/coins/markets",
             {
                 "vs_currency": "usd",
                 "ids": ids_str,

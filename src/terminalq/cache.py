@@ -1,4 +1,5 @@
 """Simple file-based cache with TTL support."""
+
 import json
 import time
 from pathlib import Path
