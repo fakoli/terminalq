@@ -73,7 +73,7 @@ Keys are loaded from `~/.env` via python-dotenv (`override=True`).
 **Portfolio:**
 - `terminalq_get_portfolio()` — Static holdings from `~/.terminalq/portfolio-holdings.md`
 - `terminalq_get_portfolio_live()` — Holdings with live prices + daily P&L
-- `terminalq_get_rsu_schedule()` — RSU vesting from `~/.terminalq/rsu-schedule.md`
+- `terminalq_get_rsu_schedule()` — RSU vesting schedule from `~/.terminalq/rsu-schedule.md`
 - `terminalq_get_watchlist()` — Watchlist with live quotes
 - `terminalq_get_risk_metrics(period)` — Sharpe, Sortino, VaR, beta, max drawdown
 - `terminalq_get_allocation()` — Asset class breakdown + concentration risk
@@ -111,7 +111,7 @@ Keys are loaded from `~/.env` via python-dotenv (`override=True`).
 | `/quote SYMBOL` | Real-time quote with portfolio context |
 | `/portfolio` | All holdings with live prices, grouped by account |
 | `/news [SYMBOL]` | News for a ticker or top portfolio holdings |
-| `/rsu` | RSU vesting schedule + current stock price |
+| `/rsu` | RSU vesting schedule + current employer stock price |
 | `/dividends SYMBOL` | Dividend history, yield, projected income |
 | `/earnings SYMBOL` | Earnings history, beat rate, EPS trend |
 | `/historical SYMBOL [PERIOD]` | Historical price data |

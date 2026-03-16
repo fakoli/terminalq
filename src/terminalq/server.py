@@ -86,10 +86,10 @@ async def terminalq_get_quotes_batch(symbols: str) -> str:
 @mcp.tool()
 @audited
 async def terminalq_get_portfolio() -> str:
-    """Get current portfolio holdings across all accounts (Fidelity Joint, Fidelity Roth IRA, Schwab).
+    """Get current portfolio holdings across all accounts.
 
     Returns all positions with shares, cost basis, market value, and unrealized gain/loss.
-    Data comes from the most recent brokerage statements stored in reference/portfolio-holdings.md.
+    Data comes from the most recent brokerage statements stored in ~/.terminalq/portfolio-holdings.md.
     """
     holdings = portfolio.load_portfolio()
     if not holdings:
@@ -211,7 +211,7 @@ async def terminalq_get_news(symbol: str, days: int = 7) -> str:
 @mcp.tool()
 @audited
 async def terminalq_get_rsu_schedule() -> str:
-    """Get Pinterest RSU vesting schedule for 2026-2028."""
+    """Get RSU vesting schedule from ~/.terminalq/rsu-schedule.md."""
     schedule = portfolio.load_rsu_schedule()
     if not schedule:
         return json.dumps({"error": "No RSU schedule found. Update reference/rsu-schedule.md"})
@@ -640,7 +640,7 @@ async def terminalq_web_search(query: str, count: int = 5) -> str:
     """Search the web for financial news, company info, or market analysis.
 
     Args:
-        query: Search query (e.g., "Pinterest Q4 earnings", "Fed rate decision March 2026")
+        query: Search query (e.g., "AAPL Q4 earnings", "Fed rate decision March 2026")
         count: Number of results to return (default 5, max 20)
     """
     result = await search.web_search(query, min(count, 20))

@@ -155,7 +155,7 @@ def _extract_sources(d: dict) -> list[str]:
 def _sanitize_args(args: dict) -> dict:
     """Remove any sensitive data from args before logging."""
     sanitized = {}
-    sensitive_keys = {"api_key", "token", "password", "secret"}
+    sensitive_keys = {"api_key", "apikey", "api_secret", "token", "password", "secret", "key", "subscription_token"}
     for k, v in args.items():
         if k.lower() in sensitive_keys:
             sanitized[k] = "***"

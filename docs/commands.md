@@ -64,7 +64,7 @@ For commands with multiple arguments (e.g., `/filings PINS 10-K`), the command i
 | Command | Arguments | Description |
 |---------|-----------|-------------|
 | `/portfolio` | none | All holdings with live prices and daily P&L |
-| `/rsu` | none | Pinterest RSU vesting schedule |
+| `/rsu` | none | RSU vesting schedule and employer stock |
 
 ### Research Commands
 

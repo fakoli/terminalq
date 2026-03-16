@@ -55,7 +55,7 @@ async def get_series(series_id: str, limit: int = 12) -> dict:
         }
 
     resolved_id = _resolve_series_id(series_id)
-    log.info("FRED get_series: series=%s resolved=%s key_len=%d", series_id, resolved_id, len(FRED_API_KEY))
+    log.info("FRED get_series: series=%s resolved=%s", series_id, resolved_id)
     cache_key = f"fred_{resolved_id}_{limit}"
     cached = cache.get(cache_key)
     if cached:
@@ -100,7 +100,6 @@ async def get_series(series_id: str, limit: int = 12) -> dict:
         return {
             "error": f"HTTP {e.response.status_code}",
             "detail": e.response.text[:300],
-            "key_len": len(FRED_API_KEY),
             "series": resolved_id,
             "source": "fred",
         }
