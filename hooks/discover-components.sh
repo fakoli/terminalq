@@ -30,7 +30,7 @@ echo ""
 echo "Hooks:"
 if [[ -f "$PLUGIN_ROOT/hooks/hooks.json" ]]; then
     if command -v jq &>/dev/null; then
-        jq -r '.hooks[] | "  - \(.event): \(.name) — \(.description)"' "$PLUGIN_ROOT/hooks/hooks.json"
+        jq -r '.hooks | to_entries[] | "  - \(.key): \(.value | length) hook(s)"' "$PLUGIN_ROOT/hooks/hooks.json"
     else
         echo "  (install jq to list hooks)"
     fi

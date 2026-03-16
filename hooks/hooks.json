@@ -1,16 +1,29 @@
 {
-  "hooks": [
-    {
-      "name": "session-check",
-      "event": "SessionStart",
-      "command": "bash hooks/session-check.sh",
-      "description": "Verify required API keys and environment on session start"
-    },
-    {
-      "name": "stop-quality-gate",
-      "event": "Stop",
-      "command": "bash hooks/stop-quality-gate.sh",
-      "description": "Check that financial analysis outputs include disclaimer and data freshness"
-    }
-  ]
+  "description": "TerminalQ quality enforcement hooks",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/session-check.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/stop-quality-gate.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
 }

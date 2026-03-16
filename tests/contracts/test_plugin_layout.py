@@ -81,12 +81,23 @@ class TestHooksLayout:
 
         data = json.loads(hooks_path.read_text())
         assert "hooks" in data
-        assert isinstance(data["hooks"], list)
+        assert isinstance(data["hooks"], dict), "hooks must be a dict keyed by event name"
 
-        for hook in data["hooks"]:
-            assert "name" in hook, f"Hook missing 'name': {hook}"
-            assert "event" in hook, f"Hook missing 'event': {hook}"
-            assert "command" in hook, f"Hook missing 'command': {hook}"
+        valid_events = {"PreToolUse", "PostToolUse", "Stop", "SubagentStop",
+                        "SessionStart", "SessionEnd", "UserPromptSubmit",
+                        "PreCompact", "Notification"}
+        for event, matchers in data["hooks"].items():
+            assert event in valid_events, f"Unknown hook event: {event}"
+            assert isinstance(matchers, list), f"hooks[{event}] must be a list of matcher objects"
+            for matcher_obj in matchers:
+                assert "matcher" in matcher_obj, f"Matcher in {event} missing 'matcher'"
+                assert "hooks" in matcher_obj, f"Matcher in {event} missing 'hooks'"
+                assert isinstance(matcher_obj["hooks"], list), f"Matcher hooks in {event} must be a list"
+                for hook in matcher_obj["hooks"]:
+                    assert "type" in hook, f"Hook in {event} missing 'type'"
+                    assert hook["type"] in ("command", "prompt"), (
+                        f"Hook type must be 'command' or 'prompt', got '{hook['type']}'"
+                    )
 
     def test_hook_scripts_exist(self):
         hooks_path = PROJECT_ROOT / "hooks" / "hooks.json"
@@ -94,12 +105,16 @@ class TestHooksLayout:
             pytest.skip("No hooks.json")
 
         data = json.loads(hooks_path.read_text())
-        for hook in data["hooks"]:
-            cmd = hook["command"]
-            # Extract script path from command (e.g., "bash hooks/stop-quality-gate.sh")
-            parts = cmd.split()
-            script = parts[-1] if len(parts) > 1 else parts[0]
-            script_path = PROJECT_ROOT / script
-            assert script_path.exists(), (
-                f"Hook '{hook['name']}' references missing script: {script}"
-            )
+        for event, matchers in data["hooks"].items():
+            for matcher_obj in matchers:
+                for hook in matcher_obj.get("hooks", []):
+                    if hook.get("type") != "command":
+                        continue
+                    cmd = hook["command"]
+                    cmd_resolved = cmd.replace("${CLAUDE_PLUGIN_ROOT}", str(PROJECT_ROOT))
+                    parts = cmd_resolved.split()
+                    script = parts[-1] if len(parts) > 1 else parts[0]
+                    script_path = Path(script)
+                    assert script_path.exists(), (
+                        f"Hook in {event} references missing script: {script}"
+                    )

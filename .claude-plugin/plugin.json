@@ -4,5 +4,6 @@
   "description": "Bloomberg-style financial terminal — 32 MCP tools, 6 workflow skills, audit trails, Polygon.io fallback, usage tracking",
   "author": {
     "name": "fakoli"
-  }
+  },
+  "hooks": "./hooks/hooks.json"
 }
