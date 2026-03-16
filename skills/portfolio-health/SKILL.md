@@ -1,6 +1,11 @@
 ---
 name: portfolio-health
-description: Portfolio health check — performance, risk, allocation, RSU exposure
+description: >-
+  Comprehensive portfolio health check covering performance, risk metrics, asset allocation,
+  RSU exposure, and benchmark comparison. Use this skill when you want to review your portfolio,
+  check diversification, assess risk, or understand RSU concentration. Ask "how is my portfolio",
+  "portfolio health", "portfolio review", "check my portfolio", "portfolio performance",
+  "my holdings", or "am I diversified" to trigger this workflow. Produces a Portfolio Scorecard contract output.
 triggers:
   - how is my portfolio
   - portfolio health
@@ -24,7 +29,7 @@ Perform a comprehensive portfolio health check in two steps:
 
 **Step 2:** From the RSU schedule results, identify the RSU ticker symbol. Then call `terminalq_get_quote(rsu_symbol)` to get the current price for RSU valuation. If no RSU schedule exists, skip this step.
 
-After gathering all data, produce a structured health check:
+After gathering all data, produce a structured health check following the **Portfolio Scorecard** contract in `docs/output-contracts.md`:
 
 **Portfolio Scorecard:**
 
@@ -65,4 +70,24 @@ After gathering all data, produce a structured health check:
 - Tax awareness: note which accounts are taxable vs Roth (sell from Roth first for tax efficiency)
 - Concentration reduction plan if RSU stock > 15%
 
+**Data Freshness:** Include a table noting each data source, how recent it is, and confidence level (High/Moderate/Low per `docs/output-contracts.md`).
+
+**Disclaimer:** End with the standard disclaimer from `docs/output-contracts.md`.
+
 Keep it practical — scorecard first, then details, then actionable recommendations.
+
+## Failure Modes
+
+| Failure Mode | Signal | Response |
+|---|---|---|
+| Portfolio data missing | `terminalq_get_portfolio_live` fails or returns empty | Stop and instruct user to run `/ingest` to set up portfolio data |
+| Risk metrics fail | `terminalq_get_risk_metrics` errors | Skip Risk Assessment section; note that risk analysis requires historical data |
+| No RSU schedule | `terminalq_get_rsu_schedule` returns empty or errors | Skip RSU Impact section entirely; note in output that no RSU data was found |
+| Allocation tool fails | `terminalq_get_allocation` errors | Skip Allocation Analysis chart; try to estimate allocation from portfolio holdings directly |
+| Stale portfolio prices | Quote data is from previous close | Note in Data Freshness that prices are from last close (markets may be closed) |
+
+## When Not to Use
+
+- **Do not use** if portfolio data hasn't been ingested — run `/ingest` first
+- **Do not use** for individual stock decisions — use `trade-research` instead
+- **Do not use** for broad market context — use `market-overview` instead
