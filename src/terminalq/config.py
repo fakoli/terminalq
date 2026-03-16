@@ -14,8 +14,16 @@ FRED_API_KEY = os.environ.get("FRED_API_KEY", "")
 SEC_USER_AGENT = os.environ.get("SEC_USER_AGENT", "TerminalQ user@example.com")
 
 # --- Directories ---
+# Private data lives in ~/.terminalq/ by default (outside the git repo).
+# Override with PORTFOLIO_DIR env var or .mcp.json env block.
+_DEFAULT_PORTFOLIO_DIR = Path.home() / ".terminalq"
+_FALLBACK_PORTFOLIO_DIR = Path(__file__).parent.parent.parent / "reference"
+
 CACHE_DIR = Path(os.environ.get("CACHE_DIR", Path(__file__).parent.parent.parent / "data" / "cache"))
-PORTFOLIO_DIR = Path(os.environ.get("PORTFOLIO_DIR", Path(__file__).parent.parent.parent / "reference"))
+PORTFOLIO_DIR = Path(os.environ.get(
+    "PORTFOLIO_DIR",
+    _DEFAULT_PORTFOLIO_DIR if _DEFAULT_PORTFOLIO_DIR.exists() else _FALLBACK_PORTFOLIO_DIR,
+))
 
 # --- Rate limits (requests per minute) ---
 FINNHUB_RATE_LIMIT = 60

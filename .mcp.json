@@ -4,8 +4,7 @@
       "command": "uv",
       "args": ["run", "--directory", "${CLAUDE_PLUGIN_ROOT}", "python", "-m", "terminalq"],
       "env": {
-        "CACHE_DIR": "${CLAUDE_PLUGIN_ROOT}/data/cache",
-        "PORTFOLIO_DIR": "${CLAUDE_PLUGIN_ROOT}/reference"
+        "CACHE_DIR": "${CLAUDE_PLUGIN_ROOT}/data/cache"
       }
     }
   }
