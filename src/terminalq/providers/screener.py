@@ -1,7 +1,9 @@
 """S&P 500 stock screener provider — cached component list with sector/metric filtering."""
+
 import asyncio
 import csv
 import io
+
 import httpx
 
 from terminalq import cache
@@ -9,10 +11,7 @@ from terminalq.config import CACHE_TTL_SP500_LIST
 from terminalq.logging_config import log
 from terminalq.providers import finnhub
 
-_SP500_CSV_URL = (
-    "https://raw.githubusercontent.com/datasets/"
-    "s-and-p-500-companies/main/data/constituents.csv"
-)
+_SP500_CSV_URL = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv"
 
 # Maximum number of symbols to fetch profiles for in one screen call
 _PROFILE_FETCH_THRESHOLD = 50
@@ -52,11 +51,13 @@ async def get_sp500_components() -> list[dict]:
         name = row.get("Name", "").strip()
         sector = row.get("Sector", "").strip()
         if symbol:
-            components.append({
-                "symbol": symbol,
-                "name": name,
-                "sector": sector,
-            })
+            components.append(
+                {
+                    "symbol": symbol,
+                    "name": name,
+                    "sector": sector,
+                }
+            )
 
     log.info("Parsed %d S&P 500 components", len(components))
     cache.set(cache_key, components, CACHE_TTL_SP500_LIST)
@@ -97,10 +98,7 @@ async def screen_stocks(
     # --- Sector filter (local, case-insensitive partial match) ---
     if sector:
         sector_lower = sector.lower()
-        filtered = [
-            c for c in components
-            if sector_lower in c.get("sector", "").lower()
-        ]
+        filtered = [c for c in components if sector_lower in c.get("sector", "").lower()]
     else:
         filtered = list(components)
 
@@ -111,12 +109,14 @@ async def screen_stocks(
     if sector:
         filters_applied["sector"] = sector
 
-    has_numeric_filters = any([
-        min_market_cap > 0,
-        max_market_cap > 0,
-        min_dividend_yield > 0,
-        max_pe_ratio > 0,
-    ])
+    has_numeric_filters = any(
+        [
+            min_market_cap > 0,
+            max_market_cap > 0,
+            min_dividend_yield > 0,
+            max_pe_ratio > 0,
+        ]
+    )
 
     if has_numeric_filters:
         if min_market_cap > 0:
@@ -151,13 +151,15 @@ async def screen_stocks(
             if max_market_cap > 0 and market_cap > max_market_cap:
                 continue
 
-            results.append({
-                "symbol": sym,
-                "name": comp.get("name", profile.get("name", "")),
-                "sector": comp.get("sector", ""),
-                "market_cap": market_cap,
-                "industry": profile.get("industry", ""),
-            })
+            results.append(
+                {
+                    "symbol": sym,
+                    "name": comp.get("name", profile.get("name", "")),
+                    "sector": comp.get("sector", ""),
+                    "market_cap": market_cap,
+                    "industry": profile.get("industry", ""),
+                }
+            )
 
     elif has_numeric_filters and matches_after_sector > _PROFILE_FETCH_THRESHOLD:
         # Too many symbols to fetch profiles — apply only cached profiles
@@ -175,39 +177,39 @@ async def screen_stocks(
                     continue
                 if max_market_cap > 0 and market_cap > max_market_cap:
                     continue
-                results.append({
-                    "symbol": sym,
-                    "name": comp.get("name", cached_profile.get("name", "")),
-                    "sector": comp.get("sector", ""),
-                    "market_cap": market_cap,
-                    "industry": cached_profile.get("industry", ""),
-                })
+                results.append(
+                    {
+                        "symbol": sym,
+                        "name": comp.get("name", cached_profile.get("name", "")),
+                        "sector": comp.get("sector", ""),
+                        "market_cap": market_cap,
+                        "industry": cached_profile.get("industry", ""),
+                    }
+                )
             else:
                 # Include without numeric data so the list is still useful
-                results.append({
-                    "symbol": sym,
-                    "name": comp.get("name", ""),
-                    "sector": comp.get("sector", ""),
-                    "market_cap": None,
-                    "industry": "",
-                })
+                results.append(
+                    {
+                        "symbol": sym,
+                        "name": comp.get("name", ""),
+                        "sector": comp.get("sector", ""),
+                        "market_cap": None,
+                        "industry": "",
+                    }
+                )
     else:
         # No numeric filters — return sector-filtered list directly
         for comp in filtered:
             cached_profile = cache.get(f"finnhub_profile_{comp['symbol']}")
-            results.append({
-                "symbol": comp["symbol"],
-                "name": comp.get("name", ""),
-                "sector": comp.get("sector", ""),
-                "market_cap": (
-                    cached_profile.get("market_cap")
-                    if cached_profile else None
-                ),
-                "industry": (
-                    cached_profile.get("industry", "")
-                    if cached_profile else ""
-                ),
-            })
+            results.append(
+                {
+                    "symbol": comp["symbol"],
+                    "name": comp.get("name", ""),
+                    "sector": comp.get("sector", ""),
+                    "market_cap": (cached_profile.get("market_cap") if cached_profile else None),
+                    "industry": (cached_profile.get("industry", "") if cached_profile else ""),
+                }
+            )
 
     matches_after_all = len(results)
 
@@ -226,6 +228,12 @@ async def screen_stocks(
         "results": results,
         "filters_applied": filters_applied,
         "source": "screener (S&P 500)",
+    }
+    response["completeness"] = {
+        "total_matching": matches_after_all,
+        "returned": len(results),
+        "is_complete": matches_after_all >= matches_after_sector,
+        "universe_size": total_universe,
     }
     if note:
         response["note"] = note

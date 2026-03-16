@@ -1,8 +1,9 @@
 """Tests for terminalq.providers.screener — S&P 500 screener with mocked HTTP."""
-import pytest
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
+import pytest
 
 from terminalq.providers import screener
 
@@ -32,7 +33,9 @@ def _mock_csv_response(csv_text=_SAMPLE_CSV, status_code=200):
     resp.raise_for_status = MagicMock()
     if status_code >= 400:
         resp.raise_for_status.side_effect = httpx.HTTPStatusError(
-            f"HTTP {status_code}", request=MagicMock(), response=resp,
+            f"HTTP {status_code}",
+            request=MagicMock(),
+            response=resp,
         )
     return resp
 

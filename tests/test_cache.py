@@ -1,4 +1,5 @@
 """Tests for terminalq.cache — file-based cache with TTL."""
+
 import json
 import time
 

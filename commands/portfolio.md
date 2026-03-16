@@ -10,12 +10,14 @@ Present the results as a table grouped by account (use the account names from th
 For each holding show: Symbol, Shares, Live Price, Live Value, Daily Change ($), Daily Change (%).
 
 At the top, show:
+
 - **Total Portfolio Value** (sum of all live values)
 - **Total Daily Change** (sum of all daily changes)
 
 At the bottom, show:
+
 - **Asset Allocation Summary**: Group by category (US Equity, International, Emerging Markets, Fixed Income, Cash)
 - **Top 5 Holdings by Value**
-- **PINS Concentration**: What % of total portfolio is Pinterest stock
+- **Top Concentration**: What % of total portfolio is the single largest stock position
 
 Use green for gains, red for losses in your formatting.

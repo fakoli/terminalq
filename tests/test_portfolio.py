@@ -1,13 +1,14 @@
 """Tests for terminalq.providers.portfolio — holdings parsing."""
-import pytest
-from pathlib import Path
+
 from unittest.mock import patch
 
+import pytest
+
 from terminalq.providers.portfolio import (
-    _parse_holdings_md,
     _parse_dollar,
-    load_rsu_schedule,
+    _parse_holdings_md,
     get_unique_symbols,
+    load_rsu_schedule,
 )
 
 
@@ -144,12 +145,13 @@ def test_rsu_schedule(rsu_md):
 def test_unique_symbols(holdings_md):
     """Unique symbols are sorted and deduplicated across accounts."""
     with patch("terminalq.providers.portfolio.PORTFOLIO_DIR", holdings_md.parent):
-        with patch(
-            "terminalq.providers.portfolio.load_portfolio"
-        ) as mock_load:
+        with patch("terminalq.providers.portfolio.load_portfolio") as mock_load:
             mock_load.return_value = [
-                {"symbol": "AAPL"}, {"symbol": "MSFT"}, {"symbol": "AAPL"},
-                {"symbol": "GOOG"}, {"symbol": "VTI"},
+                {"symbol": "AAPL"},
+                {"symbol": "MSFT"},
+                {"symbol": "AAPL"},
+                {"symbol": "GOOG"},
+                {"symbol": "VTI"},
             ]
             symbols = get_unique_symbols()
     assert symbols == ["AAPL", "GOOG", "MSFT", "VTI"]

@@ -1,8 +1,9 @@
 """Tests for terminalq.providers.edgar — SEC EDGAR with mocked HTTP."""
-import pytest
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
+import pytest
 
 from terminalq.providers import edgar
 
@@ -21,7 +22,9 @@ def _mock_response(json_data, status_code=200):
     resp.raise_for_status = MagicMock()
     if status_code >= 400:
         resp.raise_for_status.side_effect = httpx.HTTPStatusError(
-            f"HTTP {status_code}", request=MagicMock(), response=resp,
+            f"HTTP {status_code}",
+            request=MagicMock(),
+            response=resp,
         )
     return resp
 
@@ -55,16 +58,40 @@ async def test_get_financials():
                 "RevenueFromContractWithCustomerExcludingAssessedTax": {
                     "units": {
                         "USD": [
-                            {"end": "2025-09-30", "val": 394000000000, "form": "10-K", "fy": 2025, "filed": "2025-10-30"},
-                            {"end": "2024-09-30", "val": 383000000000, "form": "10-K", "fy": 2024, "filed": "2024-10-30"},
+                            {
+                                "end": "2025-09-30",
+                                "val": 394000000000,
+                                "form": "10-K",
+                                "fy": 2025,
+                                "filed": "2025-10-30",
+                            },
+                            {
+                                "end": "2024-09-30",
+                                "val": 383000000000,
+                                "form": "10-K",
+                                "fy": 2024,
+                                "filed": "2024-10-30",
+                            },
                         ]
                     }
                 },
                 "NetIncomeLoss": {
                     "units": {
                         "USD": [
-                            {"end": "2025-09-30", "val": 97000000000, "form": "10-K", "fy": 2025, "filed": "2025-10-30"},
-                            {"end": "2024-09-30", "val": 94000000000, "form": "10-K", "fy": 2024, "filed": "2024-10-30"},
+                            {
+                                "end": "2025-09-30",
+                                "val": 97000000000,
+                                "form": "10-K",
+                                "fy": 2025,
+                                "filed": "2025-10-30",
+                            },
+                            {
+                                "end": "2024-09-30",
+                                "val": 94000000000,
+                                "form": "10-K",
+                                "fy": 2024,
+                                "filed": "2024-10-30",
+                            },
                         ]
                     }
                 },

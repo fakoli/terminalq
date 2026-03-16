@@ -186,7 +186,7 @@ Get portfolio holdings with live prices from Finnhub. Combines static holdings d
 
 ### terminalq_get_rsu_schedule
 
-Get Pinterest RSU vesting schedule for 2026-2028.
+Get RSU vesting schedule from ~/.terminalq/rsu-schedule.md.
 
 | Argument | Type | Required | Default | Description |
 |----------|------|----------|---------|-------------|
@@ -221,15 +221,15 @@ Get company overview including name, industry, market cap, and key info.
 
 ```json
 {
-  "symbol": "PINS",
-  "name": "Pinterest, Inc.",
-  "exchange": "NYSE",
+  "symbol": "MSFT",
+  "name": "Microsoft Corporation",
+  "exchange": "NASDAQ",
   "industry": "Technology",
-  "market_cap": 25000,
-  "shares_outstanding": 670,
+  "market_cap": 3200000,
+  "shares_outstanding": 7430,
   "logo": "https://...",
-  "weburl": "https://www.pinterest.com",
-  "ipo": "2019-04-18",
+  "weburl": "https://www.microsoft.com",
+  "ipo": "1986-03-13",
   "country": "US",
   "currency": "USD",
   "source": "finnhub"
@@ -255,13 +255,13 @@ Get recent news articles for a company.
 ```json
 [
   {
-    "headline": "Pinterest Reports Q4 Earnings Beat",
-    "summary": "Pinterest Inc reported...",
+    "headline": "Apple Reports Q4 Earnings Beat",
+    "summary": "Apple Inc reported...",
     "source": "Reuters",
     "url": "https://...",
     "datetime": 1710400000,
     "category": "company",
-    "related": "PINS"
+    "related": "AAPL"
   }
 ]
 ```
@@ -360,9 +360,9 @@ Search SEC filings for a company (10-K, 10-Q, 8-K, etc.).
 
 ```json
 {
-  "symbol": "PINS",
-  "company_name": "PINTEREST, INC",
-  "cik": "0001562088",
+  "symbol": "AAPL",
+  "company_name": "APPLE INC",
+  "cik": "0000320193",
   "filings": [
     {
       "type": "10-K",

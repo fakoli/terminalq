@@ -1,8 +1,9 @@
 """Tests for terminalq.providers.finnhub — quote & profile with mocked HTTP."""
-import pytest
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
+import pytest
 
 from terminalq.providers import finnhub
 
@@ -21,7 +22,9 @@ def _mock_response(json_data, status_code=200):
     resp.raise_for_status = MagicMock()
     if status_code >= 400:
         resp.raise_for_status.side_effect = httpx.HTTPStatusError(
-            f"HTTP {status_code}", request=MagicMock(), response=resp,
+            f"HTTP {status_code}",
+            request=MagicMock(),
+            response=resp,
         )
     return resp
 
@@ -29,8 +32,14 @@ def _mock_response(json_data, status_code=200):
 async def test_get_quote():
     """get_quote returns structured result from Finnhub API response."""
     api_data = {
-        "c": 150.25, "d": 1.5, "dp": 1.01,
-        "h": 151.0, "l": 149.0, "o": 149.5, "pc": 148.75, "t": 1700000000,
+        "c": 150.25,
+        "d": 1.5,
+        "dp": 1.01,
+        "h": 151.0,
+        "l": 149.0,
+        "o": 149.5,
+        "pc": 148.75,
+        "t": 1700000000,
     }
 
     mock_client = AsyncMock()
@@ -53,13 +62,24 @@ async def test_get_quotes_batch_cached_and_uncached(tmp_cache_dir):
     from terminalq import cache
 
     # Pre-cache AAPL
-    cache.set("finnhub_quote_AAPL", {
-        "symbol": "AAPL", "current_price": 150.0, "source": "finnhub",
-    }, ttl=300)
+    cache.set(
+        "finnhub_quote_AAPL",
+        {
+            "symbol": "AAPL",
+            "current_price": 150.0,
+            "source": "finnhub",
+        },
+        ttl=300,
+    )
 
     api_data = {
-        "c": 300.0, "d": 2.0, "dp": 0.67,
-        "h": 301.0, "l": 299.0, "o": 299.5, "pc": 298.0,
+        "c": 300.0,
+        "d": 2.0,
+        "dp": 0.67,
+        "h": 301.0,
+        "l": 299.0,
+        "o": 299.5,
+        "pc": 298.0,
     }
 
     mock_client = AsyncMock()
@@ -116,7 +136,9 @@ async def test_error_handling():
     error_resp = _mock_response({}, status_code=403)
     mock_client.get.return_value = error_resp
     mock_client.get.return_value.raise_for_status.side_effect = httpx.HTTPStatusError(
-        "403", request=MagicMock(), response=error_resp,
+        "403",
+        request=MagicMock(),
+        response=error_resp,
     )
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=False)

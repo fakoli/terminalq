@@ -8,6 +8,7 @@ arguments:
 ---
 
 Parse the arguments "$ARGUMENTS" to extract:
+
 - **symbol**: the ticker symbol (first word, e.g., AAPL)
 - **period**: optional lookback period (1mo, 3mo, 6mo, 1y, 2y, 5y). Default: 6mo
 - **chart_type**: optional type — "line" (default) or "candlestick"
@@ -32,6 +33,7 @@ Examples: "AAPL" → symbol=AAPL, period=6mo, chart_type=line. "AAPL 3mo" → sy
    - A brief summary: period start price, end price, high, low, total return %
 
 Example output format:
+
 ```
 AAPL — 6mo
 

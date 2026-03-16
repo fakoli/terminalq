@@ -1,8 +1,8 @@
 {
   "name": "terminalq",
-  "version": "0.3.0",
-  "description": "Bloomberg-style financial terminal — 30 MCP tools: quotes, charts, crypto, forex, portfolio analytics, SEC filings, economic indicators, technical analysis, stock screening, and web search",
+  "version": "0.4.0",
+  "description": "Bloomberg-style financial terminal — 32 MCP tools, 6 workflow skills, audit trails, Polygon.io fallback, usage tracking",
   "author": {
-    "name": "Sekou Doumbouya"
+    "name": "fakoli"
   }
 }

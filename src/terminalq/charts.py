@@ -3,9 +3,9 @@
 Every function takes data and returns a formatted string.
 No API calls, no caching, no imports from terminalq providers.
 """
+
 from __future__ import annotations
 
-import math
 import re
 
 SPARK_CHARS = "▁▂▃▄▅▆▇█"
@@ -61,7 +61,7 @@ def line_chart(
     if labels:
         if len(data) > 60:
             step = max(1, len(labels) // 60)
-            plot_labels = labels[::step][:len(plot_data)]
+            plot_labels = labels[::step][: len(plot_data)]
         else:
             plot_labels = list(labels)
 
@@ -198,7 +198,6 @@ def bar_chart(
         if bar_len < width and abs(val) / max_val * width - bar_len >= 0.5:
             bar += "\u258c"  # half block
 
-        sign = "-" if val < 0 else "+"
         val_str = f"{val:>10,.2f}"
         prefix = "-" if val < 0 else " "
         parts.append(f"  {padded}  {prefix}{bar} {val_str}")
@@ -295,9 +294,13 @@ def yield_curve_chart(
 
     parts.append("")
     if spread < 0:
-        parts.append(f"  *** INVERTED ***  Spread: {spread:+.2f}%  ({maturities[0]}: {short_yield:.2f}%  vs  {maturities[-1]}: {long_yield:.2f}%)")
+        parts.append(
+            f"  *** INVERTED ***  Spread: {spread:+.2f}%  ({maturities[0]}: {short_yield:.2f}%  vs  {maturities[-1]}: {long_yield:.2f}%)"
+        )
     else:
-        parts.append(f"  Spread: {spread:+.2f}%  ({maturities[0]}: {short_yield:.2f}%  vs  {maturities[-1]}: {long_yield:.2f}%)")
+        parts.append(
+            f"  Spread: {spread:+.2f}%  ({maturities[0]}: {short_yield:.2f}%  vs  {maturities[-1]}: {long_yield:.2f}%)"
+        )
 
     # Check for mid-curve inversion
     if len(yields) >= 3:

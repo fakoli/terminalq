@@ -15,6 +15,7 @@ Use the `terminalq_get_historical` MCP tool to get historical OHLCV data for "$A
 If a period is specified (e.g., "AAPL 6mo"), pass it as the period parameter. Default is 1y.
 
 Present the results as:
+
 - **Period Summary**: Date range, number of trading days
 - **Price Range**: 52-week high/low (or period high/low), current price
 - **Performance**: Total return over the period (%)

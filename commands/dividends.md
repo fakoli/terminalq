@@ -10,6 +10,7 @@ arguments:
 Use the `terminalq_get_dividends` MCP tool to get dividend data for "$ARGUMENTS".
 
 Present the results showing:
+
 - **Current Yield**: Annual dividend / current price
 - **Annual Dividend**: Sum of last 4 payments
 - **Payout Frequency**: Monthly, quarterly, semi-annual, or annual

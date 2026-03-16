@@ -10,6 +10,7 @@ arguments:
 Use `terminalq_get_economic_calendar` with the specified number of days (default 7).
 
 Present the calendar grouped by day, showing:
+
 - Date and event name
 - Impact level (high/medium/low) with visual indicator
 - Previous value, estimate, and actual (if released)

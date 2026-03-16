@@ -1,9 +1,74 @@
-import pytest
 import json
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+import re
+from unittest.mock import MagicMock
 
 import httpx
+import pytest
+
+
+def parse_frontmatter(text: str) -> tuple[dict, str]:
+    """Parse YAML-like frontmatter from a markdown file.
+
+    Returns (frontmatter_dict, body_text). Handles simple key: value,
+    key: [list] patterns, and YAML folded/literal block scalars (>-, |-)
+    without requiring PyYAML.
+    """
+    if not text.startswith("---"):
+        return {}, text
+
+    parts = text.split("---", 2)
+    if len(parts) < 3:
+        return {}, text
+
+    raw = parts[1].strip()
+    body = parts[2].strip()
+    fm: dict = {}
+    current_key = None
+    folding_key = None  # Track multiline folded scalar (>- or |-)
+
+    for line in raw.splitlines():
+        # If we're collecting a folded/literal scalar
+        if folding_key:
+            # Indented continuation line
+            if line.startswith("  ") and not re.match(r"^  - ", line):
+                fm[folding_key] += " " + line.strip()
+                continue
+            else:
+                # End of folded block — strip leading/trailing whitespace
+                fm[folding_key] = fm[folding_key].strip()
+                folding_key = None
+
+        # List item under current key
+        if line.startswith("  - ") and current_key:
+            val = line.strip().lstrip("- ").strip()
+            if not isinstance(fm.get(current_key), list):
+                fm[current_key] = []
+            fm[current_key].append(val)
+            continue
+
+        # Nested key (e.g., arguments sub-fields) — skip
+        if line.startswith("    "):
+            continue
+
+        match = re.match(r"^(\w[\w-]*):\s*(.*)", line)
+        if match:
+            key = match.group(1)
+            value = match.group(2).strip()
+            current_key = key
+            # Detect YAML folded (>-) or literal (|-) block scalar
+            if value in (">-", ">", "|-", "|"):
+                folding_key = key
+                fm[key] = ""
+            elif value:
+                fm[key] = value
+            else:
+                fm[key] = []
+
+    # Close any open folded block
+    if folding_key and folding_key in fm:
+        fm[folding_key] = fm[folding_key].strip()
+
+    return fm, body
 
 
 @pytest.fixture

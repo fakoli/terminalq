@@ -1,9 +1,11 @@
 """FRED (Federal Reserve Economic Data) provider — economic indicators and dashboard."""
+
 import asyncio
+
 import httpx
 
 from terminalq import cache
-from terminalq.config import FRED_API_KEY, CACHE_TTL_ECONOMIC, CACHE_TTL_ECONOMIC_INTRADAY
+from terminalq.config import CACHE_TTL_ECONOMIC, CACHE_TTL_ECONOMIC_INTRADAY, FRED_API_KEY
 from terminalq.logging_config import log
 
 BASE_URL = "https://api.stlouisfed.org/fred"
@@ -48,24 +50,19 @@ async def get_series(series_id: str, limit: int = 12) -> dict:
     """
     if not FRED_API_KEY:
         return {
-            "error": "FRED_API_KEY not configured. Get a free key at "
-                     "https://fred.stlouisfed.org/docs/api/api_key.html",
+            "error": "FRED_API_KEY not configured. Get a free key at https://fred.stlouisfed.org/docs/api/api_key.html",
             "source": "fred",
         }
 
     resolved_id = _resolve_series_id(series_id)
-    log.info("FRED get_series: series=%s resolved=%s key_len=%d", series_id, resolved_id, len(FRED_API_KEY))
+    log.info("FRED get_series: series=%s resolved=%s", series_id, resolved_id)
     cache_key = f"fred_{resolved_id}_{limit}"
     cached = cache.get(cache_key)
     if cached:
         log.debug("Cache hit: %s", cache_key)
         return cached
 
-    ttl = (
-        CACHE_TTL_ECONOMIC_INTRADAY
-        if resolved_id in INTRADAY_SERIES
-        else CACHE_TTL_ECONOMIC
-    )
+    ttl = CACHE_TTL_ECONOMIC_INTRADAY if resolved_id in INTRADAY_SERIES else CACHE_TTL_ECONOMIC
 
     try:
         async with httpx.AsyncClient() as client:
@@ -100,7 +97,12 @@ async def get_series(series_id: str, limit: int = 12) -> dict:
         return {"error": "Request timed out", "source": "fred"}
     except httpx.HTTPStatusError as e:
         log.warning("FRED HTTP %d for series %s: %s", e.response.status_code, resolved_id, e.response.text[:200])
-        return {"error": f"HTTP {e.response.status_code}", "detail": e.response.text[:300], "key_len": len(FRED_API_KEY), "series": resolved_id, "source": "fred"}
+        return {
+            "error": f"HTTP {e.response.status_code}",
+            "detail": e.response.text[:300],
+            "series": resolved_id,
+            "source": "fred",
+        }
     except httpx.ConnectError:
         log.error("FRED connection failed for series %s", resolved_id)
         return {"error": "Connection failed", "source": "fred"}
@@ -122,10 +124,12 @@ async def get_series(series_id: str, limit: int = 12) -> dict:
         if raw_value == ".":
             continue
         try:
-            observations.append({
-                "date": obs["date"],
-                "value": float(raw_value),
-            })
+            observations.append(
+                {
+                    "date": obs["date"],
+                    "value": float(raw_value),
+                }
+            )
         except (ValueError, KeyError):
             continue
 
@@ -155,8 +159,7 @@ async def get_economic_dashboard() -> dict:
     """
     if not FRED_API_KEY:
         return {
-            "error": "FRED_API_KEY not configured. Get a free key at "
-                     "https://fred.stlouisfed.org/docs/api/api_key.html",
+            "error": "FRED_API_KEY not configured. Get a free key at https://fred.stlouisfed.org/docs/api/api_key.html",
             "source": "fred",
         }
 
@@ -167,9 +170,17 @@ async def get_economic_dashboard() -> dict:
         return cached
 
     dashboard_aliases = [
-        "gdp", "cpi", "core_cpi", "unemployment", "fed_funds",
-        "10y_yield", "2y_yield", "yield_spread", "initial_claims",
-        "nonfarm_payrolls", "consumer_sentiment",
+        "gdp",
+        "cpi",
+        "core_cpi",
+        "unemployment",
+        "fed_funds",
+        "10y_yield",
+        "2y_yield",
+        "yield_spread",
+        "initial_claims",
+        "nonfarm_payrolls",
+        "consumer_sentiment",
     ]
 
     results = await asyncio.gather(
@@ -185,7 +196,9 @@ async def get_economic_dashboard() -> dict:
             continue
 
         if not isinstance(result, dict) or "error" in result:
-            indicators[alias] = {"error": result.get("error", "Unknown error") if isinstance(result, dict) else str(result)}
+            indicators[alias] = {
+                "error": result.get("error", "Unknown error") if isinstance(result, dict) else str(result)
+            }
             continue
 
         obs = result.get("observations", [])
@@ -246,8 +259,7 @@ async def get_forex(pair: str, limit: int = 30) -> dict:
     """
     if not FRED_API_KEY:
         return {
-            "error": "FRED_API_KEY not configured. Get a free key at "
-                     "https://fred.stlouisfed.org/docs/api/api_key.html",
+            "error": "FRED_API_KEY not configured. Get a free key at https://fred.stlouisfed.org/docs/api/api_key.html",
             "source": "fred",
         }
 
@@ -314,10 +326,12 @@ async def get_forex(pair: str, limit: int = 30) -> dict:
         if raw_value == ".":
             continue
         try:
-            observations.append({
-                "date": obs["date"],
-                "value": float(raw_value),
-            })
+            observations.append(
+                {
+                    "date": obs["date"],
+                    "value": float(raw_value),
+                }
+            )
         except (ValueError, KeyError):
             continue
 

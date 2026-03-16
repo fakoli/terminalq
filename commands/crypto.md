@@ -12,6 +12,7 @@ If specific symbol(s) provided ("$ARGUMENTS"), use `terminalq_get_crypto_quote` 
 If no symbol provided, fetch the default set: BTC, ETH, SOL, ADA, AVAX, LINK, DOT, UNI.
 
 Present each coin showing:
+
 - Price with 24h change ($ and %)
 - 7d and 30d change %
 - Market cap and rank

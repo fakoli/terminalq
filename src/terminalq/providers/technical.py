@@ -1,4 +1,5 @@
 """Technical analysis indicators — pure computation from historical price data."""
+
 from terminalq import cache
 from terminalq.config import CACHE_TTL_HISTORY
 from terminalq.providers import historical
@@ -92,13 +93,13 @@ def compute_rsi(closes: list[float], period: int = 14) -> dict:
     return {"rsi": rsi, "signal": signal, "period": period}
 
 
-def compute_macd(
-    closes: list[float], fast: int = 12, slow: int = 26, signal_period: int = 9
-) -> dict:
+def compute_macd(closes: list[float], fast: int = 12, slow: int = 26, signal_period: int = 9) -> dict:
     """Compute MACD (Moving Average Convergence Divergence)."""
     if len(closes) < slow + signal_period:
         return {
-            "macd_line": None, "signal_line": None, "histogram": None,
+            "macd_line": None,
+            "signal_line": None,
+            "histogram": None,
             "signal": "insufficient_data",
             "parameters": {"fast": fast, "slow": slow, "signal": signal_period},
         }
@@ -117,14 +118,13 @@ def compute_macd(
 
     # Align: slow_ema starts later
     offset = slow - fast
-    macd_line_series = [
-        fast_ema[i + offset] - slow_ema[i]
-        for i in range(len(slow_ema))
-    ]
+    macd_line_series = [fast_ema[i + offset] - slow_ema[i] for i in range(len(slow_ema))]
 
     if len(macd_line_series) < signal_period:
         return {
-            "macd_line": None, "signal_line": None, "histogram": None,
+            "macd_line": None,
+            "signal_line": None,
+            "histogram": None,
             "signal": "insufficient_data",
             "parameters": {"fast": fast, "slow": slow, "signal": signal_period},
         }
@@ -150,15 +150,19 @@ def compute_bollinger_bands(closes: list[float], period: int = 20, std_dev: floa
     """Compute Bollinger Bands."""
     if len(closes) < period:
         return {
-            "upper_band": None, "middle_band": None, "lower_band": None,
+            "upper_band": None,
+            "middle_band": None,
+            "lower_band": None,
             "current_price": closes[-1] if closes else None,
-            "bandwidth": None, "percent_b": None, "signal": "insufficient_data",
+            "bandwidth": None,
+            "percent_b": None,
+            "signal": "insufficient_data",
         }
 
     window = closes[-period:]
     middle = sum(window) / period
     variance = sum((x - middle) ** 2 for x in window) / period
-    std = variance ** 0.5
+    std = variance**0.5
 
     upper = round(middle + std_dev * std, 2)
     lower = round(middle - std_dev * std, 2)

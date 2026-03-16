@@ -1,8 +1,9 @@
 """Tests for terminalq.providers.fred — FRED economic data with mocked HTTP."""
-import pytest
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
+import pytest
 
 from terminalq.providers import fred
 
@@ -22,7 +23,9 @@ def _mock_response(json_data, status_code=200):
     resp.raise_for_status = MagicMock()
     if status_code >= 400:
         resp.raise_for_status.side_effect = httpx.HTTPStatusError(
-            f"HTTP {status_code}", request=MagicMock(), response=resp,
+            f"HTTP {status_code}",
+            request=MagicMock(),
+            response=resp,
         )
     return resp
 
@@ -37,11 +40,7 @@ async def test_get_series(monkeypatch):
             {"date": "2026-01-01", "value": "3.1"},
         ]
     }
-    info_data = {
-        "seriess": [
-            {"title": "Consumer Price Index", "frequency": "Monthly", "units": "Index 1982-1984=100"}
-        ]
-    }
+    info_data = {"seriess": [{"title": "Consumer Price Index", "frequency": "Monthly", "units": "Index 1982-1984=100"}]}
 
     async def mock_get(url, **kwargs):
         if "observations" in url:
@@ -107,9 +106,7 @@ async def test_dashboard(monkeypatch):
             {"date": "2026-01-01", "value": "4.5"},
         ]
     }
-    info_data = {
-        "seriess": [{"title": "Test", "frequency": "Monthly", "units": "Percent"}]
-    }
+    info_data = {"seriess": [{"title": "Test", "frequency": "Monthly", "units": "Percent"}]}
 
     async def mock_get(url, **kwargs):
         if "observations" in url:
@@ -147,9 +144,7 @@ async def test_dot_value_skip(monkeypatch):
             {"date": "2026-01-01", "value": "."},
         ]
     }
-    info_data = {
-        "seriess": [{"title": "Daily Rate", "frequency": "Daily", "units": "Percent"}]
-    }
+    info_data = {"seriess": [{"title": "Daily Rate", "frequency": "Daily", "units": "Percent"}]}
 
     async def mock_get(url, **kwargs):
         if "observations" in url:
