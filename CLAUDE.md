@@ -5,12 +5,11 @@ Bloomberg-style financial terminal for portfolio intelligence, built as a Claude
 ## Quick Start
 
 ```bash
-/tq-setup                   # Interactive onboarding — API keys, data directory
 ./setup.sh                  # Install deps, create ~/.terminalq/, check API keys
-uv run python -m terminalq  # Start MCP server
+/tq-setup                   # Interactive onboarding — obtain and configure API keys
 ```
 
-**First time?** Run `/tq-setup` — it walks you through obtaining each API key with step-by-step instructions, then writes them to `~/.env`.
+**First time?** Run `./setup.sh` first to install dependencies, then run `/tq-setup` inside Claude Code for guided API key configuration.
 
 ## Private Data Storage
 

@@ -82,11 +82,12 @@ Then use AskUserQuestion to ask: "Paste your FRED API key (or choose 'Skip' to s
 
 After required keys are handled, ask if the user wants to set up optional keys.
 
-Use AskUserQuestion: "Would you like to configure any optional API keys?"
+Use AskUserQuestion with **multiSelect: true**: "Which optional API keys would you like to configure?"
 - Option 1: "Brave Search API" — web search for financial research
 - Option 2: "Polygon.io API" — fallback stock data provider
 - Option 3: "SEC User Agent" — custom identity for SEC EDGAR requests
-- Option 4: "Skip optional setup"
+
+If the user selects none (or chooses "Other" to skip), move on to Step 4. Otherwise, walk through each selected key below.
 
 ### BRAVE_API_KEY (if selected)
 
@@ -125,26 +126,40 @@ Format: "YourName your-email@example.com"
 
 ## Step 4: Write keys to ~/.env
 
-For each key the user provided, **append** it to `~/.env`. CRITICAL rules:
-- If `~/.env` doesn't exist, create it with mode 600 (owner read/write only)
-- If `~/.env` exists, DO NOT overwrite — only append new lines
-- Before appending, check if the key already exists in the file. If it does, ask the user if they want to update it
+For each key the user provided, write it to `~/.env`. CRITICAL rules:
+
+### File creation (if `~/.env` doesn't exist)
+
+Create the file atomically with correct permissions — never `touch` then `chmod` (race condition):
+```bash
+(umask 077 && touch ~/.env)
+```
+
+### Writing a key
+
+Always use `printf` instead of `echo` to safely handle keys with special characters:
+```bash
+printf '%s\n' 'KEY_NAME="the_key_value"' >> ~/.env
+```
+
+### Handling existing keys (prevent duplicates)
+
+Before writing, check if the key already exists in the file:
+```bash
+grep -q "^FINNHUB_API_KEY=" ~/.env 2>/dev/null
+```
+
+- **If the key does NOT exist**: append it with `printf '%s\n' 'KEY_NAME="value"' >> ~/.env`
+- **If the key already exists**: ask the user if they want to update it. If yes, **replace in-place** — do NOT append a duplicate:
+```bash
+sed -i '' 's|^FINNHUB_API_KEY=.*|FINNHUB_API_KEY="new_value"|' ~/.env
+```
+
+### Formatting
+
 - Use the format: `KEY_NAME="value"` (one per line)
 - Add a blank line before the TerminalQ section if the file already has content
 - Add a comment header the first time: `# TerminalQ API Keys`
-
-Use the Bash tool to append, for example:
-```bash
-# Check if key already in file
-grep -q "^FINNHUB_API_KEY=" ~/.env 2>/dev/null
-# If not, append
-echo 'FINNHUB_API_KEY="the_key_value"' >> ~/.env
-```
-
-Set file permissions if creating new:
-```bash
-touch ~/.env && chmod 600 ~/.env
-```
 
 ## Step 5: Verify and set up data directory
 
