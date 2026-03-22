@@ -64,5 +64,5 @@ if [[ ${#ERRORS[@]} -eq 0 ]]; then
     echo "  Status: ready"
 else
     echo ""
-    echo "  Status: degraded — run /setup for guided API key configuration"
+    echo "  Status: degraded — run /tq-setup for guided API key configuration"
 fi

@@ -1,5 +1,5 @@
 ---
-name: setup
+name: tq-setup
 description: Interactive onboarding — configure API keys and private data directory for TerminalQ
 ---
 
@@ -14,7 +14,7 @@ Read `~/.env` to see which API keys are already set. Also check the shell enviro
 - `FRED_API_KEY` — needed for economic indicators, yield curve, forex, macro dashboard
 
 **Optional keys:**
-- `BRAVE_API_KEY` — enables `/search` web search (2,000 free calls/month)
+- `BRAVE_API_KEY` — enables `/tq-search` web search (2,000 free calls/month)
 - `POLYGON_API_KEY` — enables Polygon.io fallback for stock data (5 free calls/min)
 - `SEC_USER_AGENT` — identifies you to SEC EDGAR (defaults to "TerminalQ user@example.com")
 
@@ -91,7 +91,7 @@ Use AskUserQuestion: "Would you like to configure any optional API keys?"
 ### BRAVE_API_KEY (if selected)
 
 ```
-Brave Search API enables the /search command for web-based financial research.
+Brave Search API enables the /tq-search command for web-based financial research.
 Free tier: 2,000 searches per month.
 
 To get your API key:
@@ -156,7 +156,7 @@ Tell the user:
 ```
 Your private data directory is ready at ~/.terminalq/
 
-To import your portfolio data, run: /ingest holdings
+To import your portfolio data, run: /tq-ingest holdings
 You can paste brokerage statements, CSVs, or enter positions manually.
 ```
 
@@ -173,14 +173,14 @@ Configured APIs:
   [any optional ones configured]
 
 Next steps:
-  /ingest holdings  — Import your portfolio from brokerage data
-  /portfolio        — View your holdings with live prices
-  /quote AAPL       — Get a real-time stock quote
-  /market-overview  — Get a morning market briefing
+  /tq-ingest holdings  — Import your portfolio from brokerage data
+  /tq-portfolio        — View your holdings with live prices
+  /tq-quote AAPL       — Get a real-time stock quote
+  /market-overview     — Get a morning market briefing
 ```
 
 If any required keys were skipped, remind them:
 ```
 Skipped keys (some features will be unavailable):
-  FINNHUB_API_KEY — run /setup again to add it
+  FINNHUB_API_KEY — run /tq-setup again to add it
 ```

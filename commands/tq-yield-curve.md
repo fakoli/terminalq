@@ -1,5 +1,5 @@
 ---
-name: yield-curve
+name: tq-yield-curve
 description: Plot the current US Treasury yield curve
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: usage
+name: tq-usage
 description: View TerminalQ usage statistics and API budget
 arguments: []
 ---

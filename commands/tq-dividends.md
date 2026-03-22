@@ -1,5 +1,5 @@
 ---
-name: dividends
+name: tq-dividends
 description: Get dividend history and yield for a symbol
 arguments:
   - name: symbol

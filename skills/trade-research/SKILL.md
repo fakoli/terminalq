@@ -99,4 +99,4 @@ After gathering all data, produce an investment decision brief following the **T
 
 - **Do not use** without first understanding the company — this skill calls company data internally, but for a standalone research report use `company-research`
 - **Do not use** for broad market context — use `market-overview` first to understand the environment
-- **Do not use** if portfolio hasn't been ingested — Portfolio Fit will be incomplete; run `/ingest` first
+- **Do not use** if portfolio hasn't been ingested — Portfolio Fit will be incomplete; run `/tq-ingest` first

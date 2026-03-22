@@ -1,5 +1,5 @@
 ---
-name: risk
+name: tq-risk
 description: Compute portfolio risk metrics (Sharpe, Sortino, drawdown, VaR, beta)
 arguments:
   - name: period

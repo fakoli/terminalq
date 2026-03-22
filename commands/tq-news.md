@@ -1,5 +1,5 @@
 ---
-name: news
+name: tq-news
 description: Get recent news for a ticker or portfolio holdings
 arguments:
   - name: symbol

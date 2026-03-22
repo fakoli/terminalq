@@ -81,13 +81,13 @@ BRAVE_API_KEY="your_brave_key"        # Optional — https://brave.com/search/ap
 
 ```bash
 # Option 1: Use the interactive ingestion command
-/ingest holdings
+/tq-ingest holdings
 
 # Option 2: Edit the template directly
 nano ~/.terminalq/portfolio-holdings.md
 ```
 
-TerminalQ reads portfolio data from markdown tables in `~/.terminalq/`. Templates are created during setup. The `/ingest` command can parse brokerage statements, CSVs, or pasted text.
+TerminalQ reads portfolio data from markdown tables in `~/.terminalq/`. Templates are created during setup. The `/tq-ingest` command can parse brokerage statements, CSVs, or pasted text.
 
 ---
 
@@ -197,36 +197,37 @@ TerminalQ exposes 32 MCP tools organized into five categories:
 
 ## Slash Commands
 
-26 slash commands for quick access to any tool:
+27 slash commands for quick access to any tool (all prefixed with `tq-` to avoid namespace collisions):
 
 | Command | Description |
 |---------|-------------|
-| `/quote AAPL` | Real-time quote with portfolio context |
-| `/portfolio` | All holdings with live prices, grouped by account |
-| `/news AAPL` | News for a ticker or top portfolio holdings |
-| `/earnings AAPL` | Earnings history, beat rate, EPS trend |
-| `/financials AAPL` | SEC financial statements |
-| `/technicals AAPL` | Technical analysis report |
-| `/ratings AAPL` | Analyst ratings + price targets |
-| `/chart AAPL 1y` | Price chart (line or candlestick) |
-| `/compare AAPL,MSFT,GOOGL` | Multi-symbol performance comparison |
-| `/historical AAPL 6mo` | Historical price data |
-| `/dividends VTI` | Dividend history and yield |
-| `/filings AAPL 10-K` | SEC filing search |
-| `/screen Technology` | S&P 500 stock screener |
-| `/economy` | Full macro dashboard |
-| `/yield-curve` | US Treasury yield curve |
-| `/forex` | Major currency pairs |
-| `/crypto BTC` | Cryptocurrency prices |
-| `/risk` | Portfolio risk metrics |
-| `/allocation` | Portfolio allocation visualization |
-| `/rsu` | RSU vesting schedule |
-| `/watchlist` | Watchlist with live quotes |
-| `/events` | Upcoming economic events |
-| `/search "AAPL earnings"` | Web search for research |
-| `/ingest holdings` | Import brokerage data |
-| `/audit` | Tool invocation history |
-| `/usage` | API usage and budget tracking |
+| `/tq-setup` | Interactive onboarding — configure API keys and data directory |
+| `/tq-quote AAPL` | Real-time quote with portfolio context |
+| `/tq-portfolio` | All holdings with live prices, grouped by account |
+| `/tq-news AAPL` | News for a ticker or top portfolio holdings |
+| `/tq-earnings AAPL` | Earnings history, beat rate, EPS trend |
+| `/tq-financials AAPL` | SEC financial statements |
+| `/tq-technicals AAPL` | Technical analysis report |
+| `/tq-ratings AAPL` | Analyst ratings + price targets |
+| `/tq-chart AAPL 1y` | Price chart (line or candlestick) |
+| `/tq-compare AAPL,MSFT,GOOGL` | Multi-symbol performance comparison |
+| `/tq-historical AAPL 6mo` | Historical price data |
+| `/tq-dividends VTI` | Dividend history and yield |
+| `/tq-filings AAPL 10-K` | SEC filing search |
+| `/tq-screen Technology` | S&P 500 stock screener |
+| `/tq-economy` | Full macro dashboard |
+| `/tq-yield-curve` | US Treasury yield curve |
+| `/tq-forex` | Major currency pairs |
+| `/tq-crypto BTC` | Cryptocurrency prices |
+| `/tq-risk` | Portfolio risk metrics |
+| `/tq-allocation` | Portfolio allocation visualization |
+| `/tq-rsu` | RSU vesting schedule |
+| `/tq-watchlist` | Watchlist with live quotes |
+| `/tq-events` | Upcoming economic events |
+| `/tq-search "AAPL earnings"` | Web search for research |
+| `/tq-ingest holdings` | Import brokerage data |
+| `/tq-audit` | Tool invocation history |
+| `/tq-usage` | API usage and budget tracking |
 
 ---
 

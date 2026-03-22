@@ -1,5 +1,5 @@
 ---
-name: portfolio
+name: tq-portfolio
 description: Show portfolio holdings with live prices and daily P&L
 ---
 
