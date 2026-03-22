@@ -1,5 +1,5 @@
 ---
-name: events
+name: tq-events
 description: Show upcoming economic events calendar
 arguments:
   - name: days

@@ -1,5 +1,5 @@
 ---
-name: watchlist
+name: tq-watchlist
 description: Show watchlist with live quotes and daily changes
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: crypto
+name: tq-crypto
 description: Get cryptocurrency prices and market data
 arguments:
   - name: symbol

@@ -1,5 +1,5 @@
 ---
-name: financials
+name: tq-financials
 description: Get financial statements from SEC filings
 arguments:
   - name: symbol

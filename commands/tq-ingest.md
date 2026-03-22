@@ -1,5 +1,5 @@
 ---
-name: ingest
+name: tq-ingest
 description: Import or update portfolio data from brokerage statements, CSVs, or pasted text
 arguments:
   - name: type

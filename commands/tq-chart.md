@@ -1,5 +1,5 @@
 ---
-name: chart
+name: tq-chart
 description: Generate a price chart for a symbol
 arguments:
   - name: args

@@ -1,5 +1,5 @@
 ---
-name: search
+name: tq-search
 description: Search the web for market news, research, or financial topics
 arguments:
   - name: query

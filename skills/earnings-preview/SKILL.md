@@ -70,7 +70,7 @@ Keep each company analysis concise — focus on the numbers and signals, not bac
 
 | Failure Mode | Signal | Response |
 |---|---|---|
-| Portfolio unavailable | `terminalq_get_portfolio_live` fails | Stop and instruct user to run `/ingest` first — cannot identify holdings without portfolio data |
+| Portfolio unavailable | `terminalq_get_portfolio_live` fails | Stop and instruct user to run `/tq-ingest` first — cannot identify holdings without portfolio data |
 | No earnings data | `terminalq_get_earnings` returns empty for a symbol | Note that no earnings history is available; skip that holding's analysis |
 | Earnings dates unknown | No upcoming earnings dates found in data | Note that earnings dates may not be announced yet; present available analysis for current quarter |
 | Technicals fail | `terminalq_get_technicals` errors for a symbol | Skip Technical Setup for that holding; note in output |

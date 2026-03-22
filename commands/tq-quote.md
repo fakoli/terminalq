@@ -1,5 +1,5 @@
 ---
-name: quote
+name: tq-quote
 description: Get a real-time stock/ETF quote
 arguments:
   - name: symbol

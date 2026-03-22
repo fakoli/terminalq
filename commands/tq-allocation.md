@@ -1,5 +1,5 @@
 ---
-name: allocation
+name: tq-allocation
 description: Analyze portfolio allocation by asset class, region, and style
 ---
 

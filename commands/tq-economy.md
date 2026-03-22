@@ -1,5 +1,5 @@
 ---
-name: economy
+name: tq-economy
 description: Get economic indicators or a full macro dashboard
 arguments:
   - name: indicator

@@ -1,5 +1,5 @@
 ---
-name: forex
+name: tq-forex
 description: Get exchange rate for a currency pair
 arguments:
   - name: pair

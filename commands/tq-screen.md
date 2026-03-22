@@ -1,5 +1,5 @@
 ---
-name: screen
+name: tq-screen
 description: Screen S&P 500 stocks by criteria
 arguments:
   - name: criteria

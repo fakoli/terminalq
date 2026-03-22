@@ -1,5 +1,5 @@
 ---
-name: filings
+name: tq-filings
 description: Search SEC filings for a company
 arguments:
   - name: symbol

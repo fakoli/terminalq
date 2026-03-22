@@ -80,7 +80,7 @@ Keep it practical — scorecard first, then details, then actionable recommendat
 
 | Failure Mode | Signal | Response |
 |---|---|---|
-| Portfolio data missing | `terminalq_get_portfolio_live` fails or returns empty | Stop and instruct user to run `/ingest` to set up portfolio data |
+| Portfolio data missing | `terminalq_get_portfolio_live` fails or returns empty | Stop and instruct user to run `/tq-ingest` to set up portfolio data |
 | Risk metrics fail | `terminalq_get_risk_metrics` errors | Skip Risk Assessment section; note that risk analysis requires historical data |
 | No RSU schedule | `terminalq_get_rsu_schedule` returns empty or errors | Skip RSU Impact section entirely; note in output that no RSU data was found |
 | Allocation tool fails | `terminalq_get_allocation` errors | Skip Allocation Analysis chart; try to estimate allocation from portfolio holdings directly |
@@ -88,6 +88,6 @@ Keep it practical — scorecard first, then details, then actionable recommendat
 
 ## When Not to Use
 
-- **Do not use** if portfolio data hasn't been ingested — run `/ingest` first
+- **Do not use** if portfolio data hasn't been ingested — run `/tq-ingest` first
 - **Do not use** for individual stock decisions — use `trade-research` instead
 - **Do not use** for broad market context — use `market-overview` instead

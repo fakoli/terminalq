@@ -1,5 +1,5 @@
 ---
-name: technicals
+name: tq-technicals
 description: Get technical analysis indicators for a symbol
 arguments:
   - name: symbol

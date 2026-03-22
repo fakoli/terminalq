@@ -1,5 +1,5 @@
 ---
-name: audit
+name: tq-audit
 description: View the audit trail of all TerminalQ tool invocations
 arguments:
   - name: date

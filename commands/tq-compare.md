@@ -1,5 +1,5 @@
 ---
-name: compare
+name: tq-compare
 description: Compare price performance of multiple symbols
 arguments:
   - name: symbols

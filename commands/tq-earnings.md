@@ -1,5 +1,5 @@
 ---
-name: earnings
+name: tq-earnings
 description: Get earnings history and estimates for a company
 arguments:
   - name: symbol

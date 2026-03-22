@@ -1,5 +1,5 @@
 ---
-name: historical
+name: tq-historical
 description: Get historical price data for a symbol
 arguments:
   - name: symbol

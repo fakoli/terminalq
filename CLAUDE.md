@@ -5,9 +5,11 @@ Bloomberg-style financial terminal for portfolio intelligence, built as a Claude
 ## Quick Start
 
 ```bash
-./setup.sh          # Install deps, create ~/.terminalq/, check API keys
-uv run python -m terminalq  # Start MCP server
+./setup.sh                  # Install deps, create ~/.terminalq/, check API keys
+/tq-setup                   # Interactive onboarding — obtain and configure API keys
 ```
+
+**First time?** Run `./setup.sh` first to install dependencies, then run `/tq-setup` inside Claude Code for guided API key configuration.
 
 ## Private Data Storage
 
@@ -23,7 +25,7 @@ uv run python -m terminalq  # Start MCP server
 ```
 
 - Run `./setup.sh` to create `~/.terminalq/` with starter templates
-- Run `/ingest holdings` to import brokerage data interactively
+- Run `/tq-ingest holdings` to import brokerage data interactively
 - The repo's `reference/` directory contains only `.example.md` templates
 - `PORTFOLIO_DIR` env var can override the data location if needed
 
@@ -45,7 +47,7 @@ uv run python -m terminalq  # Start MCP server
   - `allocation.py` — Asset class breakdown, concentration risk
 - **Charts**: `src/terminalq/charts.py` — Sparklines, line/candlestick charts, heatmaps, allocation bars
 - **Infrastructure**: `cache.py`, `rate_limiter.py`, `logging_config.py`, `config.py`
-- **Commands**: `commands/` — 29 slash commands
+- **Commands**: `commands/` — 30 slash commands
 - **Tests**: `tests/` — 48 tests (pytest)
 - **Docs**: `docs/` — API reference, provider/command guides, config reference
 
@@ -104,34 +106,35 @@ Keys are loaded from `~/.env` via python-dotenv (`override=True`).
 - `terminalq_screen_stocks(sector, min_market_cap, max_market_cap, limit)` — S&P 500 screener
 - `terminalq_web_search(query, count)` — Brave web search
 
-## Slash Commands (29)
+## Slash Commands (30)
 
 | Command | Description |
 |---------|-------------|
-| `/quote SYMBOL` | Real-time quote with portfolio context |
-| `/portfolio` | All holdings with live prices, grouped by account |
-| `/news [SYMBOL]` | News for a ticker or top portfolio holdings |
-| `/rsu` | RSU vesting schedule + current employer stock price |
-| `/dividends SYMBOL` | Dividend history, yield, projected income |
-| `/earnings SYMBOL` | Earnings history, beat rate, EPS trend |
-| `/historical SYMBOL [PERIOD]` | Historical price data |
-| `/financials SYMBOL [TYPE]` | SEC financial statements |
-| `/filings SYMBOL [TYPE]` | SEC filing search |
-| `/technicals SYMBOL` | Technical analysis report |
-| `/economy [INDICATOR]` | Economic indicator or full macro dashboard |
-| `/screen [CRITERIA]` | S&P 500 stock screener |
-| `/chart SYMBOL [PERIOD] [TYPE]` | Price chart (line or candlestick) |
-| `/compare SYM1,SYM2,SYM3` | Multi-symbol performance comparison |
-| `/allocation` | Portfolio allocation visualization |
-| `/yield-curve` | US Treasury yield curve |
-| `/ratings SYMBOL` | Analyst ratings + price targets |
-| `/watchlist` | Watchlist with live quotes |
-| `/forex [PAIR]` | Forex rates (e.g., eurusd) |
-| `/crypto [SYMBOL]` | Crypto prices (BTC, ETH, SOL...) |
-| `/events` | Upcoming economic events calendar |
-| `/search QUERY` | Web search for financial research |
-| `/risk` | Portfolio risk metrics |
-| `/ingest [TYPE]` | Import brokerage data into `~/.terminalq/` |
+| `/tq-setup` | Interactive onboarding — configure API keys and data directory |
+| `/tq-quote SYMBOL` | Real-time quote with portfolio context |
+| `/tq-portfolio` | All holdings with live prices, grouped by account |
+| `/tq-news [SYMBOL]` | News for a ticker or top portfolio holdings |
+| `/tq-rsu` | RSU vesting schedule + current employer stock price |
+| `/tq-dividends SYMBOL` | Dividend history, yield, projected income |
+| `/tq-earnings SYMBOL` | Earnings history, beat rate, EPS trend |
+| `/tq-historical SYMBOL [PERIOD]` | Historical price data |
+| `/tq-financials SYMBOL [TYPE]` | SEC financial statements |
+| `/tq-filings SYMBOL [TYPE]` | SEC filing search |
+| `/tq-technicals SYMBOL` | Technical analysis report |
+| `/tq-economy [INDICATOR]` | Economic indicator or full macro dashboard |
+| `/tq-screen [CRITERIA]` | S&P 500 stock screener |
+| `/tq-chart SYMBOL [PERIOD] [TYPE]` | Price chart (line or candlestick) |
+| `/tq-compare SYM1,SYM2,SYM3` | Multi-symbol performance comparison |
+| `/tq-allocation` | Portfolio allocation visualization |
+| `/tq-yield-curve` | US Treasury yield curve |
+| `/tq-ratings SYMBOL` | Analyst ratings + price targets |
+| `/tq-watchlist` | Watchlist with live quotes |
+| `/tq-forex [PAIR]` | Forex rates (e.g., eurusd) |
+| `/tq-crypto [SYMBOL]` | Crypto prices (BTC, ETH, SOL...) |
+| `/tq-events` | Upcoming economic events calendar |
+| `/tq-search QUERY` | Web search for financial research |
+| `/tq-risk` | Portfolio risk metrics |
+| `/tq-ingest [TYPE]` | Import brokerage data into `~/.terminalq/` |
 
 ## Error Convention
 

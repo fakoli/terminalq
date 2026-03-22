@@ -1,5 +1,5 @@
 ---
-name: rsu
+name: tq-rsu
 description: Show RSU vesting schedule and current employer stock holdings
 ---
 

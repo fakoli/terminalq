@@ -1,5 +1,5 @@
 ---
-name: ratings
+name: tq-ratings
 description: Get analyst ratings and price targets for a stock
 arguments:
   - name: symbol

@@ -1,6 +1,6 @@
 # TerminalQ Slash Commands
 
-Slash commands are markdown files in `commands/` that define reusable prompts for Claude. When a user types `/quote AAPL`, Claude reads the corresponding command file and follows its instructions.
+Slash commands are markdown files in `commands/` that define reusable prompts for Claude. When a user types `/tq-quote AAPL`, Claude reads the corresponding command file and follows its instructions.
 
 ## Command Format
 
@@ -42,9 +42,9 @@ The variable "$ARGUMENTS" is replaced with whatever the user typed after the com
 
 ### The `$ARGUMENTS` Variable
 
-The string `$ARGUMENTS` in the instruction body is replaced with the user's raw input after the command name. For example, if the user types `/quote AAPL`, then `$ARGUMENTS` becomes `"AAPL"`.
+The string `$ARGUMENTS` in the instruction body is replaced with the user's raw input after the command name. For example, if the user types `/tq-quote AAPL`, then `$ARGUMENTS` becomes `"AAPL"`.
 
-For commands with multiple arguments (e.g., `/filings PINS 10-K`), the command instructions should parse the combined string.
+For commands with multiple arguments (e.g., `/tq-filings PINS 10-K`), the command instructions should parse the combined string.
 
 ---
 
@@ -54,33 +54,33 @@ For commands with multiple arguments (e.g., `/filings PINS 10-K`), the command i
 
 | Command | Arguments | Description |
 |---------|-----------|-------------|
-| `/quote SYMBOL` | symbol (required) | Real-time stock/ETF quote |
-| `/historical SYMBOL [PERIOD]` | symbol (required), period (optional) | Historical OHLCV data |
-| `/dividends SYMBOL` | symbol (required) | Dividend history and yield |
-| `/technicals SYMBOL` | symbol (required) | Technical analysis indicators |
+| `/tq-quote SYMBOL` | symbol (required) | Real-time stock/ETF quote |
+| `/tq-historical SYMBOL [PERIOD]` | symbol (required), period (optional) | Historical OHLCV data |
+| `/tq-dividends SYMBOL` | symbol (required) | Dividend history and yield |
+| `/tq-technicals SYMBOL` | symbol (required) | Technical analysis indicators |
 
 ### Portfolio Commands
 
 | Command | Arguments | Description |
 |---------|-----------|-------------|
-| `/portfolio` | none | All holdings with live prices and daily P&L |
-| `/rsu` | none | RSU vesting schedule and employer stock |
+| `/tq-portfolio` | none | All holdings with live prices and daily P&L |
+| `/tq-rsu` | none | RSU vesting schedule and employer stock |
 
 ### Research Commands
 
 | Command | Arguments | Description |
 |---------|-----------|-------------|
-| `/news [SYMBOL]` | symbol (optional) | News for a ticker or top portfolio holdings |
-| `/earnings SYMBOL` | symbol (required) | Earnings history and estimates |
-| `/financials SYMBOL [STATEMENT]` | symbol (required), statement (optional) | SEC financial statements |
-| `/filings SYMBOL [TYPE]` | symbol (required), type (optional) | SEC filing search |
+| `/tq-news [SYMBOL]` | symbol (optional) | News for a ticker or top portfolio holdings |
+| `/tq-earnings SYMBOL` | symbol (required) | Earnings history and estimates |
+| `/tq-financials SYMBOL [STATEMENT]` | symbol (required), statement (optional) | SEC financial statements |
+| `/tq-filings SYMBOL [TYPE]` | symbol (required), type (optional) | SEC filing search |
 
 ### Economics & Screening Commands
 
 | Command | Arguments | Description |
 |---------|-----------|-------------|
-| `/economy [INDICATOR]` | indicator (optional) | Single indicator or full macro dashboard |
-| `/screen [CRITERIA]` | criteria (optional) | S&P 500 stock screener |
+| `/tq-economy [INDICATOR]` | indicator (optional) | Single indicator or full macro dashboard |
+| `/tq-screen [CRITERIA]` | criteria (optional) | S&P 500 stock screener |
 
 ---
 
