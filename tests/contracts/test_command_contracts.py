@@ -42,7 +42,13 @@ class TestCommandFrontmatter:
         assert "description" in command["frontmatter"], f"/{command['name']}: missing 'description' in frontmatter"
 
 
+# Commands that are configuration/onboarding and don't invoke MCP tools
+NO_TOOL_COMMANDS = {"tq-setup"}
+
+
 class TestCommandBody:
     def test_has_tool_reference(self, command):
+        if command["name"] in NO_TOOL_COMMANDS:
+            pytest.skip(f"/{command['name']} is a config command — no MCP tools expected")
         refs = re.findall(r"terminalq_\w+", command["body"])
         assert len(refs) > 0, f"/{command['name']}: no tool references (terminalq_*) found"
