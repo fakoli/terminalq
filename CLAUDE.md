@@ -5,9 +5,12 @@ Bloomberg-style financial terminal for portfolio intelligence, built as a Claude
 ## Quick Start
 
 ```bash
-./setup.sh          # Install deps, create ~/.terminalq/, check API keys
+/setup                      # Interactive onboarding — API keys, data directory
+./setup.sh                  # Install deps, create ~/.terminalq/, check API keys
 uv run python -m terminalq  # Start MCP server
 ```
+
+**First time?** Run `/setup` — it walks you through obtaining each API key with step-by-step instructions, then writes them to `~/.env`.
 
 ## Private Data Storage
 
@@ -45,7 +48,7 @@ uv run python -m terminalq  # Start MCP server
   - `allocation.py` — Asset class breakdown, concentration risk
 - **Charts**: `src/terminalq/charts.py` — Sparklines, line/candlestick charts, heatmaps, allocation bars
 - **Infrastructure**: `cache.py`, `rate_limiter.py`, `logging_config.py`, `config.py`
-- **Commands**: `commands/` — 29 slash commands
+- **Commands**: `commands/` — 30 slash commands
 - **Tests**: `tests/` — 48 tests (pytest)
 - **Docs**: `docs/` — API reference, provider/command guides, config reference
 
@@ -104,10 +107,11 @@ Keys are loaded from `~/.env` via python-dotenv (`override=True`).
 - `terminalq_screen_stocks(sector, min_market_cap, max_market_cap, limit)` — S&P 500 screener
 - `terminalq_web_search(query, count)` — Brave web search
 
-## Slash Commands (29)
+## Slash Commands (30)
 
 | Command | Description |
 |---------|-------------|
+| `/setup` | Interactive onboarding — configure API keys and data directory |
 | `/quote SYMBOL` | Real-time quote with portfolio context |
 | `/portfolio` | All holdings with live prices, grouped by account |
 | `/news [SYMBOL]` | News for a ticker or top portfolio holdings |

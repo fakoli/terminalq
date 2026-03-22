@@ -64,5 +64,5 @@ if [[ ${#ERRORS[@]} -eq 0 ]]; then
     echo "  Status: ready"
 else
     echo ""
-    echo "  Status: degraded — set missing keys in ~/.env and restart"
+    echo "  Status: degraded — run /setup for guided API key configuration"
 fi
